@@ -2,11 +2,11 @@
 // Navigation
 function showSc(id){document.querySelectorAll('.sc').forEach(s=>s.classList.remove('active','visible'));const s=document.getElementById(id);s.classList.add('active');requestAnimationFrame(()=>requestAnimationFrame(()=>s.classList.add('visible')));}
 function goHome(){showSc('sl');}
-function showStats(){showSc('ss');if(!loaded)loadStats();}
+function showStats(){showSc('ss');if(!loaded)loadStats();document.getElementById('home-tiles').style.display='none';document.getElementById('stats-loaded').style.display='flex';document.getElementById('ldscr').style.display='none';}
 function showLinEmpty(){showSc('slin');document.getElementById('lnm').textContent='Select an artist';document.getElementById('lsub').textContent='Go to Statistics → tap any artist';document.getElementById('lload').style.display='none';document.getElementById('lsvg').style.display='none';}
 function goBack(){showSc('ss');}
-function showLin(){ document.getElementById('home-tiles').style.display='none'; document.getElementById('stats-loaded').style.display='flex'; if(!lbLoaded) loadLivingBridges(); document.querySelectorAll('.view-panel').forEach(p=>p.classList.remove('active')); const p=document.getElementById('view-bridges'); if(p) p.classList.add('active'); }
-function showKM(){ document.getElementById('home-tiles').style.display='none'; document.getElementById('stats-loaded').style.display='flex'; document.querySelectorAll('.view-panel').forEach(p=>p.classList.remove('active')); const p=document.getElementById('view-kshetra'); if(p){p.classList.add('active'); setTimeout(()=>kmInit(),250);} }
+function showLin(){ document.getElementById('home-tiles').style.display='none'; document.getElementById('stats-loaded').style.display='flex'; document.getElementById('ldscr').style.display='none'; if(!lbLoaded) loadLivingBridges(); document.querySelectorAll('.view-panel').forEach(p=>p.classList.remove('active')); const p=document.getElementById('view-bridges'); if(p) p.classList.add('active'); }
+function showKM(){ document.getElementById('home-tiles').style.display='none'; document.getElementById('stats-loaded').style.display='flex'; document.getElementById('ldscr').style.display='none'; document.querySelectorAll('.view-panel').forEach(p=>p.classList.remove('active')); const p=document.getElementById('view-kshetra'); if(p){ p.classList.add('active'); setTimeout(()=>kmInit(),250); } }
 function goToStats(){showSc('ss');if(!loaded)loadStats();}
 
 let lbLoaded=false,allBridges=[];
