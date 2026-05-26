@@ -224,52 +224,31 @@
     document.getElementById('search-state').innerHTML+=`<div class="loading" id="loading-indicator"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div><span style="margin-left:4px;">Consulting the heritage ledger…</span></div>`;
   }
 
-  async function doSearch(){
+async function doSearch(){
     const q=(document.getElementById('search-input').value||'').trim();
     if(!q)return;
-
-    // Show loading
     const existing=document.getElementById('loading-indicator');
     if(!existing)showLoading();
-
     try{
-      const{data:profiles,error}=await db.from('profiles')
+      const res=await db.from('profiles')
         .select('id,full_name,primary_role,current_country,instrument_aliases,is_deceased,biography')
         .ilike('full_name','%'+q+'%')
-        .eq('is_deceased',false)
         .limit(20);
-
       const li=document.getElementById('loading-indicator');
       if(li)li.remove();
-
-    if(error){console.error('Search error:',error);}
-    if(!profiles||!profiles.length){
-        // Try including deceased
-        const{data:all,error:e2}=await db.from('profiles')
-        .select('id,full_name,primary_role,current_country,instrument_aliases,is_deceased,biography')
-        .ilike('full_name','%'+q+'%')
-        .limit(20);
-        console.log('Fallback results:',all,'Error:',e2);
-
-        if(!all||!all.length){
-          document.getElementById('search-state').style.display='flex';
-          document.getElementById('notfound-state').style.display='flex';
-          document.getElementById('nf-msg').textContent='We couldn\'t find anyone matching "'+q+'" in the Parampara registry. You may not yet be listed — but you can be.';
-          return;
-        }
-        showResults(all,q);
+      if(res.error||!res.data||!res.data.length){
+        document.getElementById('search-state').style.display='flex';
+        document.getElementById('notfound-state').style.display='flex';
+        document.getElementById('nf-msg').textContent='We couldn\'t find anyone matching "'+q+'". You may not yet be listed — but you can be.';
         return;
       }
-
-      if(profiles.length===1){
-        showProfile(profiles[0]);
-      }else{
-        showResults(profiles,q);
-      }
+      if(res.data.length===1){showProfile(res.data[0]);}
+      else{showResults(res.data,q);}
     }catch(e){
-      console.error(e);
+      console.error('Search error:',e);
       const li=document.getElementById('loading-indicator');
       if(li)li.remove();
+      alert('Search error: '+e.message);
     }
   }
 
