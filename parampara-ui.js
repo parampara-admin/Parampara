@@ -69,30 +69,18 @@ function renderBridges(bridges){
   grid.innerHTML=out;
 }
 
-window.addEventListener('load', async () => {
-  // Clear the URL parameter without reloading
-  const params = new URLSearchParams(window.location.search);
-  const view = params.get('view');
-  history.replaceState(null, '', window.location.pathname);
+async function handleGoto(){const goto=sessionStorage.getItem('goto');sessionStorage.removeItem('goto');if(!loaded)await loadStats();if(goto==='bridges'){const btn=document.querySelector('.vtab[onclick*=bridges]');if(btn)switchView('bridges',btn);}else if(goto==='kshetra'){const btn=document.querySelector('.vtab[onclick*=kshetra]');if(btn)switchView('kshetra',btn);}}
 
-  const { data: { session } } = await db.auth.getSession();
-  if (session) {
-    window.location.href='home.html';
-    if (view === 'bridges') {
-      const btn = document.querySelector('.vtab[onclick*=bridges]');
-      if (btn) switchView('bridges', btn);
-    } else if (view === 'kshetra') {
-      const btn = document.querySelector('.vtab[onclick*=kshetra]');
-      if (btn) switchView('kshetra', btn);
-    }
-  } else {
-    // Try refreshing the session once
-    const { data: { session: s2 } } = await db.auth.refreshSession();
-    if (s2) {
-      window.location.href='home.html';
-    } else {
-      showSc('sl');
-    }
+window.addEventListener('load',async()=>{
+  history.replaceState(null,'',window.location.pathname);
+  const{data:{session}}=await db.auth.getSession();
+  if(session){
+    showSc('ss');
+    handleGoto();
+  }else{
+    const{data:{session:s2}}=await db.auth.refreshSession();
+    if(s2){showSc('ss');handleGoto();}
+    else{showSc('sl');}
   }
 });
 // View tab switching
