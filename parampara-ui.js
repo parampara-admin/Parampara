@@ -75,11 +75,11 @@ window.addEventListener('load',async()=>{
   history.replaceState(null,'',window.location.pathname);
   const{data:{session}}=await db.auth.getSession();
   if(session){
-    window.location.href='home.html';return;
+    const goto=sessionStorage.getItem('goto');if(!goto){window.location.href='home.html';return;}showSc('ss');handleGoto();
     handleGoto();
   }else{
     const{data:{session:s2}}=await db.auth.refreshSession();
-    if(s2){window.location.href='home.html';return;}
+    if(s2){const goto=sessionStorage.getItem('goto');if(!goto){window.location.href='home.html';return;}showSc('ss');handleGoto();}
     else{showSc('sl');}
   }
 });
