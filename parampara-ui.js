@@ -80,6 +80,7 @@ window.addEventListener('load', async () => {
   if (session) {
     showSc('ss');
     if (!loaded) await loadStats();
+    document.getElementById('home-tiles').style.display='flex';document.getElementById('stats-loaded').style.display='none';
     if (view === 'bridges') {
       const btn = document.querySelector('.vtab[onclick*=bridges]');
       if (btn) switchView('bridges', btn);
@@ -93,6 +94,7 @@ window.addEventListener('load', async () => {
     if (s2) {
       showSc('ss');
       if (!loaded) await loadStats();
+      document.getElementById('home-tiles').style.display='flex';document.getElementById('stats-loaded').style.display='none';
     } else {
       showSc('sl');
     }
