@@ -91,15 +91,19 @@ async function handleGoto(){
 }
 
 window.addEventListener('load',async()=>{
+  const params=new URLSearchParams(window.location.search);
+  const goto=params.get('goto');
   history.replaceState(null,'',window.location.pathname);
   const{data:{session}}=await db.auth.getSession();
   if(session){
-    const goto=sessionStorage.getItem('goto');if(!goto){window.location.href='home.html';return;}showSc('ss');document.getElementById('home-tiles').style.display='none';document.getElementById('stats-loaded').style.display='flex';handleGoto();
-    
+    if(!goto){window.location.href='home.html';return;}
+    showSc('ss');
+    document.getElementById('stats-loaded').style.display='flex';
+    await loadStats();
+    if(goto==='bridges'){const btn=document.querySelector('.vtab[onclick*=bridges]');if(btn)switchView('bridges',btn);}
+    else if(goto==='kshetra'){const btn=document.querySelector('.vtab[onclick*=kshetra]');if(btn)switchView('kshetra',btn);}
   }else{
-    const{data:{session:s2}}=await db.auth.refreshSession();
-    if(s2){const goto=sessionStorage.getItem('goto');if(!goto){window.location.href='home.html';return;}showSc('ss');document.getElementById('home-tiles').style.display='none';document.getElementById('stats-loaded').style.display='flex';handleGoto();}
-    else{showSc('sl');}
+    showSc('sl');
   }
 });
 // View tab switching
