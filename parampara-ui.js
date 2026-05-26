@@ -73,12 +73,20 @@ async function handleGoto(){
   const goto=sessionStorage.getItem('goto');
   sessionStorage.removeItem('goto');
   document.getElementById('stats-loaded').style.display='flex';
-  if(!loaded)await loadStats();
-  document.getElementById('stats-loaded').style.display='flex';
   if(goto==='bridges'){
-    setTimeout(()=>{const btn=document.querySelector('.vtab[onclick*=bridges]');if(btn)switchView('bridges',btn);},500);
+    setTimeout(()=>{
+      const btn=document.querySelector('.vtab[onclick*=bridges]');
+      if(btn){switchView('bridges',btn);}
+      else{document.getElementById('view-bridges').classList.add('active');}
+    },300);
   }else if(goto==='kshetra'){
-    setTimeout(()=>{const btn=document.querySelector('.vtab[onclick*=kshetra]');if(btn)switchView('kshetra',btn);},500);
+    setTimeout(()=>{
+      const btn=document.querySelector('.vtab[onclick*=kshetra]');
+      if(btn){switchView('kshetra',btn);}
+      else{document.getElementById('view-kshetra').classList.add('active');}
+    },300);
+  }else{
+    if(!loaded)loadStats();
   }
 }
 
