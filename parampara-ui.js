@@ -5,9 +5,8 @@ function goHome(){showSc('sl');}
 function showStats(){showSc('ss');if(!loaded)loadStats();}
 function showLinEmpty(){showSc('slin');document.getElementById('lnm').textContent='Select an artist';document.getElementById('lsub').textContent='Go to Statistics → tap any artist';document.getElementById('lload').style.display='none';document.getElementById('lsvg').style.display='none';}
 function goBack(){showSc('ss');}
-function showLin(){ showSc('ss'); if(!loaded) loadStats(); setTimeout(()=>{ const btn=document.querySelector('.vtab[onclick*=bridges]'); if(btn) switchView('bridges',btn); },400); }
-function showKM(){ showSc('ss'); if(!loaded) loadStats(); setTimeout(()=>{ const btn=document.querySelector('.vtab[onclick*=kshetra]'); if(btn) switchView('kshetra',btn); },400); }
-
+function showLin(){ document.getElementById('home-tiles').style.display='none'; document.getElementById('stats-loaded').style.display='flex'; if(!lbLoaded) loadLivingBridges(); document.querySelectorAll('.view-panel').forEach(p=>p.classList.remove('active')); const p=document.getElementById('view-bridges'); if(p) p.classList.add('active'); }
+function showKM(){ document.getElementById('home-tiles').style.display='none'; document.getElementById('stats-loaded').style.display='flex'; document.querySelectorAll('.view-panel').forEach(p=>p.classList.remove('active')); const p=document.getElementById('view-kshetra'); if(p){p.classList.add('active'); setTimeout(()=>kmInit(),250);} }
 function goToStats(){showSc('ss');if(!loaded)loadStats();}
 
 let lbLoaded=false,allBridges=[];
