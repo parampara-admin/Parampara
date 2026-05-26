@@ -188,6 +188,7 @@ async function handleGoto(){
       if(btn){switchView('kshetra',btn);}
       else{document.getElementById('view-kshetra').classList.add('active');}
     },300);
+    }else if(goto==='profile'){showProfile();}
   }else{
     if(!loaded)loadStats();
   }
