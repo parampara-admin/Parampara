@@ -223,8 +223,13 @@
   }
 
   function showLoading(){
-    document.getElementById('search-state').innerHTML+=`<div class="loading" id="loading-indicator"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div><span style="margin-left:4px;">Consulting the heritage ledger…</span></div>`;
-  }
+  const existing=document.getElementById('loading-indicator');
+  if(existing)return;
+  const d=document.createElement('div');
+  d.className='loading';d.id='loading-indicator';
+  d.innerHTML='<div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div><span style="margin-left:4px;">Consulting the heritage ledger…</span>';
+  document.getElementById('search-state').appendChild(d);
+}
 
 async function doSearch(){
     const q=(document.getElementById('search-input').value||'').trim();
