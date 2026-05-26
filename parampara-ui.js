@@ -69,7 +69,15 @@ function renderBridges(bridges){
   grid.innerHTML=out;
 }
 
-async function handleGoto(){const goto=sessionStorage.getItem('goto');sessionStorage.removeItem('goto');if(!loaded)await loadStats();if(goto==='bridges'){const btn=document.querySelector('.vtab[onclick*=bridges]');if(btn)switchView('bridges',btn);}else if(goto==='kshetra'){const btn=document.querySelector('.vtab[onclick*=kshetra]');if(btn)switchView('kshetra',btn);}}
+async function handleGoto(){
+  const goto=sessionStorage.getItem('goto');
+  sessionStorage.removeItem('goto');
+  document.getElementById('home-tiles').style.display='none';
+  document.getElementById('stats-loaded').style.display='flex';
+  if(!loaded)await loadStats();
+  if(goto==='bridges'){const btn=document.querySelector('.vtab[onclick*=bridges]');if(btn)switchView('bridges',btn);}
+  else if(goto==='kshetra'){const btn=document.querySelector('.vtab[onclick*=kshetra]');if(btn)switchView('kshetra',btn);}
+}
 
 window.addEventListener('load',async()=>{
   history.replaceState(null,'',window.location.pathname);
