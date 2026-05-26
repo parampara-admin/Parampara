@@ -1,5 +1,5 @@
 
-// Navigation
+// Navigation 
 function showSc(id){document.querySelectorAll('.sc').forEach(s=>s.classList.remove('active','visible'));const s=document.getElementById(id);s.classList.add('active');requestAnimationFrame(()=>requestAnimationFrame(()=>s.classList.add('visible')));}
 function goHome(){showSc('sl');}
 function showStats(){showSc('ss');if(!loaded)loadStats();document.getElementById('home-tiles').style.display='none';document.getElementById('stats-loaded').style.display='flex';document.getElementById('ldscr').style.display='none';}
