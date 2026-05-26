@@ -5,6 +5,8 @@ function goHome(){showSc('sl');}
 function showStats(){showSc('ss');if(!loaded)loadStats();}
 function showLinEmpty(){showSc('slin');document.getElementById('lnm').textContent='Select an artist';document.getElementById('lsub').textContent='Go to Statistics → tap any artist';document.getElementById('lload').style.display='none';document.getElementById('lsvg').style.display='none';}
 function goBack(){showSc('ss');}
+function showLin(){ showSc('ss'); if(!loaded) loadStats(); setTimeout(()=>{ const btn=document.querySelector('.vtab[onclick*=bridges]'); if(btn) switchView('bridges',btn); },400); }
+function showKM(){ showSc('ss'); if(!loaded) loadStats(); setTimeout(()=>{ const btn=document.querySelector('.vtab[onclick*=kshetra]'); if(btn) switchView('kshetra',btn); },400); }
 
 function goToStats(){showSc('ss');if(!loaded)loadStats();}
 
