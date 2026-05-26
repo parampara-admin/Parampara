@@ -71,10 +71,13 @@ function renderBridges(bridges){
 }
 
 window.addEventListener('load', async () => {
+  // Clear the URL parameter without reloading
+  const params = new URLSearchParams(window.location.search);
+  const view = params.get('view');
+  history.replaceState(null, '', window.location.pathname);
+
   const { data: { session } } = await db.auth.getSession();
   if (session) {
-    const params = new URLSearchParams(window.location.search);
-    const view = params.get('view');
     showSc('ss');
     if (!loaded) await loadStats();
     if (view === 'bridges') {
@@ -85,10 +88,16 @@ window.addEventListener('load', async () => {
       if (btn) switchView('kshetra', btn);
     }
   } else {
-    showSc('sl');
+    // Try refreshing the session once
+    const { data: { session: s2 } } = await db.auth.refreshSession();
+    if (s2) {
+      showSc('ss');
+      if (!loaded) await loadStats();
+    } else {
+      showSc('sl');
+    }
   }
 });
-
 // View tab switching
 function switchView(name, btn){
   document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('active'));
