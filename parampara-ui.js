@@ -83,11 +83,11 @@ window.addEventListener('load',async()=>{
   history.replaceState(null,'',window.location.pathname);
   const{data:{session}}=await db.auth.getSession();
   if(session){
-    const goto=sessionStorage.getItem('goto');if(!goto){window.location.href='home.html';return;}showSc('ss');handleGoto();
-    handleGoto();
+    const goto=sessionStorage.getItem('goto');if(!goto){window.location.href='home.html';return;}showSc('ss');document.getElementById('home-tiles').style.display='none';document.getElementById('stats-loaded').style.display='flex';handleGoto();
+    
   }else{
     const{data:{session:s2}}=await db.auth.refreshSession();
-    if(s2){const goto=sessionStorage.getItem('goto');if(!goto){window.location.href='home.html';return;}showSc('ss');handleGoto();}
+    if(s2){const goto=sessionStorage.getItem('goto');if(!goto){window.location.href='home.html';return;}showSc('ss');document.getElementById('home-tiles').style.display='none';document.getElementById('stats-loaded').style.display='flex';handleGoto();}
     else{showSc('sl');}
   }
 });
