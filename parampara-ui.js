@@ -8,109 +8,6 @@ function goBack(){showSc('ss');}
 function showLin(){ document.getElementById('home-tiles').style.display='none'; document.getElementById('stats-loaded').style.display='flex'; document.getElementById('ldscr').style.display='none'; if(!lbLoaded) loadLivingBridges(); document.querySelectorAll('.view-panel').forEach(p=>p.classList.remove('active')); const p=document.getElementById('view-bridges'); if(p) p.classList.add('active'); }
 function showKM(){ document.getElementById('home-tiles').style.display='none'; document.getElementById('stats-loaded').style.display='flex'; document.getElementById('ldscr').style.display='none'; document.querySelectorAll('.view-panel').forEach(p=>p.classList.remove('active')); const p=document.getElementById('view-kshetra'); if(p){ p.classList.add('active'); setTimeout(()=>kmInit(),250); } }
 function goToStats(){showSc('ss');if(!loaded)loadStats();}
-function showProfile(){showSc('sprofile');showProfSearch();}
-function showProfSearch(){
-  document.getElementById('profile-search-view').style.display='flex';
-  document.getElementById('profile-results-view').style.display='none';
-  document.getElementById('profile-notfound-view').style.display='none';
-  document.getElementById('profile-detail-view').style.display='none';
-  document.getElementById('prof-loading').style.display='none';
-}
-async function profSearch(){
-  const q=(document.getElementById('prof-input').value||'').trim();
-  if(!q)return;
-  document.getElementById('prof-loading').style.display='block';
-  const res=await db.from('profiles').select('id,full_name,primary_role,current_country,instrument_aliases,is_deceased').ilike('full_name','%'+q+'%').limit(20);
-  document.getElementById('prof-loading').style.display='none';
-  if(res.error||!res.data||!res.data.length){
-    document.getElementById('profile-search-view').style.display='flex';
-    document.getElementById('profile-notfound-view').style.display='flex';
-    document.getElementById('prof-nf-msg').textContent='We couldn\'t find anyone matching "'+q+'". You may not yet be listed.';
-    return;
-  }
-  if(res.data.length===1){profShowDetail(res.data[0]);}
-  else{profShowResults(res.data,q);}
-}
-function profShowResults(profiles,q){
-  document.getElementById('profile-search-view').style.display='none';
-  document.getElementById('profile-notfound-view').style.display='none';
-  const rv=document.getElementById('profile-results-view');
-  rv.style.display='flex';
-  rv.innerHTML='<div style="font-family:\'Cinzel\',serif;font-size:9px;letter-spacing:0.22em;color:var(--txl);margin-bottom:16px;">'+profiles.length+' MATCHES FOR "'+q.toUpperCase()+'"</div>';
-  profiles.forEach(p=>{
-    const ins=getIns(p);
-    const d=document.createElement('div');
-    d.style.cssText='background:var(--s);border:1px solid var(--bo2);border-radius:3px;padding:16px 20px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;';
-    d.innerHTML='<div><div style="font-family:\'Cormorant Garamond\',serif;font-size:20px;font-weight:600;color:var(--br);">'+p.full_name+'</div><div style="font-family:\'EB Garamond\',serif;font-style:italic;font-size:13px;color:var(--txl);">'+(p.primary_role||'')+(ins?' · '+ins:'')+(p.current_country?' · '+p.current_country:'')+'</div></div><div style="color:var(--bo);font-size:18px;">→</div>';
-    d.onclick=()=>profShowDetail(p);
-    rv.appendChild(d);
-  });
-  const back=document.createElement('button');
-  back.textContent='← Search again';
-  back.style.cssText='font-family:\'Cinzel\',serif;font-size:8px;letter-spacing:0.2em;color:var(--txl);background:none;border:1px solid var(--bo);padding:8px 20px;border-radius:2px;cursor:pointer;margin-top:8px;';
-  back.onclick=showProfSearch;
-  rv.appendChild(back);
-}
-function getIns(p){
-  if(!p.instrument_aliases)return'';
-  let a=p.instrument_aliases;
-  if(typeof a==='string'){try{a=JSON.parse(a);}catch{}}
-  if(Array.isArray(a))return a.filter(x=>x&&x!=='Vocal').slice(0,2).join(', ');
-  return'';
-}
-async function profShowDetail(profile){
-  document.getElementById('profile-search-view').style.display='none';
-  document.getElementById('profile-results-view').style.display='none';
-  document.getElementById('profile-notfound-view').style.display='none';
-  const dv=document.getElementById('profile-detail-view');
-  dv.style.display='flex';
-  dv.innerHTML='<div style="font-family:\'EB Garamond\',serif;font-style:italic;color:var(--txl);padding:20px;">Loading profile…</div>';
-  const{data:links}=await db.from('guru_shishya_lineage').select('shishya_id,guru_id,discipline,is_verified').or('shishya_id.eq.'+profile.id+',guru_id.eq.'+profile.id).neq('discipline','Heritage');
-  const ids=new Set();(links||[]).forEach(l=>{ids.add(l.guru_id);ids.add(l.shishya_id);});ids.delete(profile.id);
-  const{data:related}=ids.size>0?await db.from('profiles').select('id,full_name,primary_role,is_deceased').in('id',[...ids]):{data:[]};
-  const pm={};(related||[]).forEach(p=>{pm[p.id]=p;});pm[profile.id]=profile;
-  const gurus=(links||[]).filter(l=>l.shishya_id===profile.id).map(l=>({...pm[l.guru_id],discipline:l.discipline})).filter(g=>g&&g.full_name);
-  const shishyas=(links||[]).filter(l=>l.guru_id===profile.id).map(l=>({...pm[l.shishya_id],discipline:l.discipline})).filter(s=>s&&s.full_name);
-  const ins=getIns(profile);
-  dv.innerHTML=`
-    <button onclick="showProfSearch()" style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:0.2em;color:var(--txl);background:none;border:1px solid var(--bo);padding:8px 20px;border-radius:2px;cursor:pointer;margin-bottom:24px;align-self:flex-start;">← Search again</button>
-    <div style="background:var(--s);border:1px solid var(--bo2);border-radius:4px;padding:28px 32px;margin-bottom:24px;position:relative;overflow:hidden;">
-      <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gl),var(--g));"></div>
-      <div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:0.2em;color:var(--gl);margin-bottom:12px;">✦ HERITAGE LEDGER</div>
-      <div style="font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600;color:var(--br);margin-bottom:4px;">${profile.full_name||''}</div>
-      <div style="font-family:'EB Garamond',serif;font-style:italic;font-size:16px;color:var(--txl);margin-bottom:16px;">${profile.primary_role||''}${ins?' · '+ins:''}${profile.current_country?' · '+profile.current_country:''}</div>
-      ${gurus.length?`<div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:0.2em;color:var(--txl);margin-bottom:8px;">GURUS</div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">${gurus.map(g=>`<span style="font-family:'EB Garamond',serif;font-size:13px;color:var(--br);background:rgba(107,63,26,0.06);border:1px solid rgba(107,63,26,0.15);padding:3px 10px;border-radius:2px;">${g.is_deceased?'✦ ':''}${g.full_name}</span>`).join('')}</div>`:''}
-      ${shishyas.length?`<div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:0.2em;color:var(--txl);margin-bottom:8px;">SHISHYAS</div><div style="display:flex;flex-wrap:wrap;gap:6px;">${shishyas.map(s=>`<span style="font-family:'EB Garamond',serif;font-size:13px;color:var(--br);background:rgba(107,63,26,0.06);border:1px solid rgba(107,63,26,0.15);padding:3px 10px;border-radius:2px;">${s.full_name}</span>`).join('')}</div>`:''}
-      <div style="display:flex;gap:20px;margin-top:16px;padding-top:16px;border-top:1px solid var(--bo2);">
-        <div style="text-align:center;"><div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:300;color:var(--g);">${gurus.length}</div><div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:0.2em;color:var(--txl);">GURUS</div></div>
-        <div style="text-align:center;"><div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:300;color:var(--g);">${shishyas.length}</div><div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:0.2em;color:var(--txl);">SHISHYAS</div></div>
-      </div>
-    </div>
-    <div style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.25em;color:var(--g);margin-bottom:16px;">GURU-SHISHYA PARAMPARA</div>
-    <div id="prof-lin-wrap" style="background:var(--s);border:1px solid var(--bo2);border-radius:4px;overflow:hidden;">
-      <svg id="prof-svg" style="width:100%;height:500px;cursor:grab;"></svg>
-    </div>`;
-  setTimeout(()=>profDrawLineage(profile,links||[],pm),100);
-}
-function profDrawLineage(profile,links,pm){
-  const svg=d3.select('#prof-svg');svg.selectAll('*').remove();
-  const W=document.getElementById('prof-svg').clientWidth||800,H=500;
-  const g=svg.append('g');
-  svg.call(d3.zoom().scaleExtent([0.3,3]).on('zoom',e=>g.attr('transform',e.transform)));
-  const nodes=[],nodeMap={};
-  const addNode=(id,isCenter)=>{if(nodeMap[id])return;const p=pm[id];if(!p)return;const n={id,name:p.full_name||'',role:p.primary_role||'',isCenter,isDeceased:p.is_deceased};nodes.push(n);nodeMap[id]=n;};
-  addNode(profile.id,true);
-  links.forEach(l=>{addNode(l.guru_id,false);addNode(l.shishya_id,false);});
-  const guruIds=new Set(links.filter(l=>l.shishya_id===profile.id).map(l=>l.guru_id));
-  const shishyaIds=new Set(links.filter(l=>l.guru_id===profile.id).map(l=>l.shishya_id));
-  const cx=W/2,cy=H/2;
-  nodeMap[profile.id].x=cx;nodeMap[profile.id].y=cy;
-  const gn=nodes.filter(n=>guruIds.has(n.id)),sn=nodes.filter(n=>shishyaIds.has(n.id));
-  gn.forEach((n,i)=>{const a=(-Math.PI/2)+(i-(gn.length-1)/2)*(gn.length>1?(Math.PI*0.7/(gn.length-1)):0);n.x=cx+190*Math.cos(a);n.y=cy-160+100*Math.sin(a);});
-  sn.forEach((n,i)=>{const a=(Math.PI/2)+(i-(sn.length-1)/2)*(sn.length>1?(Math.PI*0.7/(sn.length-1)):0);n.x=cx+190*Math.cos(a);n.y=cy+160+100*Math.sin(a);});
-  links.forEach(l=>{const s=nodeMap[l.guru_id],t=nodeMap[l.shishya_id];if(!s||!t)return;g.append('line').attr('x1',s.x).attr('y1',s.y).attr('x2',t.x).attr('y2',t.y).attr('stroke',l.is_verified?'#C4A044':'#B0A080').attr('stroke-width',1.5).attr('stroke-dasharray',l.is_verified?'none':'5,4').attr('opacity',0.7);const mx=(s.x+t.x)/2,my=(s.y+t.y)/2;g.append('text').attr('x',mx).attr('y',my-4).attr('text-anchor','middle').attr('font-family','EB Garamond,serif').attr('font-style','italic').attr('font-size','11px').attr('fill','#8A7040').text(l.discipline||'');});
-  nodes.forEach(n=>{const ng=g.append('g').attr('transform',`translate(${n.x},${n.y})`);if(n.isCenter){ng.append('circle').attr('r',32).attr('fill','#C4A044').attr('opacity',0.15);ng.append('circle').attr('r',22).attr('fill','#7A5C10');ng.append('text').attr('text-anchor','middle').attr('dominant-baseline','middle').attr('font-family','Cormorant Garamond,serif').attr('font-weight','600').attr('font-size','11px').attr('fill','#FDFAF3').text(n.name.split(' ')[0]);ng.append('text').attr('y',34).attr('text-anchor','middle').attr('font-family','Cormorant Garamond,serif').attr('font-size','13px').attr('font-weight','600').attr('fill','#6B3F1A').text(n.name.length>24?n.name.substring(0,22)+'…':n.name);}else{ng.append('circle').attr('r',18).attr('fill',n.isDeceased?'none':'var(--iv)').attr('stroke',n.isDeceased?'#C4A044':'#8AA8C8').attr('stroke-width',1.5).attr('stroke-dasharray',n.isDeceased?'4,3':'none');ng.append('text').attr('text-anchor','middle').attr('dominant-baseline','middle').attr('font-family','EB Garamond,serif').attr('font-size','9px').attr('fill','var(--tx)').text(n.name.split(' ')[0]);ng.append('text').attr('y',26).attr('text-anchor','middle').attr('font-family','Cormorant Garamond,serif').attr('font-size','12px').attr('font-weight','500').attr('fill','#5A4020').text(n.name.length>20?n.name.substring(0,18)+'…':n.name);ng.append('text').attr('y',38).attr('text-anchor','middle').attr('font-family','EB Garamond,serif').attr('font-style','italic').attr('font-size','10px').attr('fill','#8A7040').text(n.role);}});
-}
 
 let lbLoaded=false,allBridges=[];
 async function loadLivingBridges(){
@@ -188,7 +85,6 @@ async function handleGoto(){
       if(btn){switchView('kshetra',btn);}
       else{document.getElementById('view-kshetra').classList.add('active');}
     },300);
-    }else if(goto==='profile'){showProfile();}
   }else{
     if(!loaded)loadStats();
   }
@@ -1799,5 +1695,4 @@ function kmResetView() {
   // Reset map view
   if (kmMap) kmMap.setView([13.5, 80.0], 6);
 }
-
 
