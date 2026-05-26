@@ -66,20 +66,27 @@
     <div class="lsc" id="ldscr"><div class="lsp">✦</div><div class="ltx">Consulting the heritage ledger…</div></div>
 
     <!-- ══════ HOME TILES ══════ -->
-    <div id="home-tiles" style="display:none;flex-direction:column;flex:1;min-height:0;padding:36px 32px;max-width:1000px;margin:0 auto;width:100%;overflow-y:auto;">
-      <div style="font-family:'Cinzel',serif;font-size:12px;letter-spacing:0.22em;color:#7A5C10;margin-bottom:24px;text-align:center;">WELCOME TO PARAMPARA</div>
-      <div style="display:flex;gap:20px;flex:1;">
-        <div onclick="showStats()" style="background:white;border:1px solid rgba(122,92,16,0.15);border-radius:4px;padding:32px 24px;cursor:pointer;transition:all 0.25s;flex:1;" onmouseover="this.style.borderColor='#C4A044';this.style.transform='translateY(-3px)'" onmouseout="this.style.borderColor='rgba(122,92,16,0.15)';this.style.transform='none'">
-          <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:#7A5C10;margin-bottom:12px;">Your Profile &amp; Lineage</div>
-          <div style="font-family:'EB Garamond',serif;font-size:14px;color:#8A7040;line-height:1.6;">Search for your name in our heritage ledger. See the lineage you carry and connect your artistic identity.</div>
+    <div id="home-tiles" style="display:none;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:40px 32px;background:var(--iv);">
+      <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:0.22em;color:var(--g);margin-bottom:28px;display:flex;align-items:center;gap:12px;">
+        <div style="flex:1;height:1px;background:var(--bo);"></div>
+        WELCOME TO PARAMPARA
+        <div style="flex:1;height:1px;background:var(--bo);"></div>
+      </div>
+      <div style="display:flex;gap:20px;width:100%;max-width:860px;">
+        <div onclick="showStats()" class="cat-card" style="flex:1;align-items:flex-start;text-align:left;max-height:160px;">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--br);">Your Profile &amp; Lineage</div>
+          <div style="font-family:'EB Garamond',serif;font-style:italic;font-size:14px;color:var(--txl);line-height:1.5;margin-top:6px;">Search your name, see your lineage, claim your profile.</div>
+          <div class="cat-card-arrow" style="margin-top:auto;">Explore →</div>
         </div>
-        <div onclick="showLin()" style="background:white;border:1px solid rgba(122,92,16,0.15);border-radius:4px;padding:32px 24px;cursor:pointer;transition:all 0.25s;flex:1;" onmouseover="this.style.borderColor='#C4A044';this.style.transform='translateY(-3px)'" onmouseout="this.style.borderColor='rgba(122,92,16,0.15)';this.style.transform='none'">
-          <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:#7A5C10;margin-bottom:12px;">Living Bridges</div>
-          <div style="font-family:'EB Garamond',serif;font-size:14px;color:#8A7040;line-height:1.6;">Explore key artists whose lineages span generations. Discover the living connections carrying this music forward.</div>
+        <div onclick="showLin()" class="cat-card" style="flex:1;align-items:flex-start;text-align:left;max-height:160px;">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--br);">Living Bridges</div>
+          <div style="font-family:'EB Garamond',serif;font-style:italic;font-size:14px;color:var(--txl);line-height:1.5;margin-top:6px;">Artists whose lineages span generations across time.</div>
+          <div class="cat-card-arrow" style="margin-top:auto;">Explore →</div>
         </div>
-        <div onclick="showKM()" style="background:white;border:1px solid rgba(122,92,16,0.15);border-radius:4px;padding:32px 24px;cursor:pointer;transition:all 0.25s;flex:1;" onmouseover="this.style.borderColor='#C4A044';this.style.transform='translateY(-3px)'" onmouseout="this.style.borderColor='rgba(122,92,16,0.15)';this.style.transform='none'">
-          <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:#7A5C10;margin-bottom:12px;">Kshetra-Kriti Map</div>
-          <div style="font-family:'EB Garamond',serif;font-size:14px;color:#8A7040;line-height:1.6;">Navigate temples and compositions across South India. Explore sacred spaces woven together across centuries.</div>
+        <div onclick="showKM()" class="cat-card" style="flex:1;align-items:flex-start;text-align:left;max-height:160px;">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--br);">Kshetra-Kriti Map</div>
+          <div style="font-family:'EB Garamond',serif;font-style:italic;font-size:14px;color:var(--txl);line-height:1.5;margin-top:6px;">Temples and compositions across South India.</div>
+          <div class="cat-card-arrow" style="margin-top:auto;">Explore →</div>
         </div>
       </div>
     </div>
