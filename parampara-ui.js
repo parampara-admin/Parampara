@@ -75,11 +75,11 @@ window.addEventListener('load',async()=>{
   history.replaceState(null,'',window.location.pathname);
   const{data:{session}}=await db.auth.getSession();
   if(session){
-    showSc('ss');
+    window.location.href='home.html';return;
     handleGoto();
   }else{
     const{data:{session:s2}}=await db.auth.refreshSession();
-    if(s2){showSc('ss');handleGoto();}
+    if(s2){window.location.href='home.html';return;}
     else{showSc('sl');}
   }
 });
