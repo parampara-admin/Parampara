@@ -242,12 +242,14 @@
       const li=document.getElementById('loading-indicator');
       if(li)li.remove();
 
-      if(error||!profiles||!profiles.length){
+    if(error){console.error('Search error:',error);}
+    if(!profiles||!profiles.length){
         // Try including deceased
-        const{data:all}=await db.from('profiles')
-          .select('id,full_name,primary_role,current_country,instrument_aliases,is_deceased,biography')
-          .ilike('full_name','%'+q+'%')
-          .limit(20);
+        const{data:all,error:e2}=await db.from('profiles')
+        .select('id,full_name,primary_role,current_country,instrument_aliases,is_deceased,biography')
+        .ilike('full_name','%'+q+'%')
+        .limit(20);
+        console.log('Fallback results:',all,'Error:',e2);
 
         if(!all||!all.length){
           document.getElementById('search-state').style.display='flex';
