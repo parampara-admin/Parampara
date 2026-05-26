@@ -70,7 +70,24 @@ function renderBridges(bridges){
   grid.innerHTML=out;
 }
 
-window.addEventListener('load',()=>showSc('sl'));
+window.addEventListener('load', async () => {
+  const { data: { session } } = await db.auth.getSession();
+  if (session) {
+    const params = new URLSearchParams(window.location.search);
+    const view = params.get('view');
+    showSc('ss');
+    if (!loaded) await loadStats();
+    if (view === 'bridges') {
+      const btn = document.querySelector('.vtab[onclick*=bridges]');
+      if (btn) switchView('bridges', btn);
+    } else if (view === 'kshetra') {
+      const btn = document.querySelector('.vtab[onclick*=kshetra]');
+      if (btn) switchView('kshetra', btn);
+    }
+  } else {
+    showSc('sl');
+  }
+});
 
 // View tab switching
 function switchView(name, btn){
