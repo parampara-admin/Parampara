@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Parampara — Enter the Lineage</title>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --iv:#F2EBD9;--ivm:#EAE0C8;
+      --g:#7A5C10;--gm:#9A7420;--gl:#C4A044;--gb:#D4AD48;
+      --br:#2E1F04;--brm:#4A3010;
+      --tx:#2C1E06;--txm:#5A4020;--txl:#8A7040;
+      --bo:rgba(122,92,16,0.15);--bom:rgba(122,92,16,0.30);--bos:rgba(122,92,16,0.55);
+      --sh:rgba(50,32,8,0.08);--shm:rgba(50,32,8,0.16);
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    html,body{width:100%;height:100%;overflow:hidden;}
+    body{
+      font-family:'EB Garamond',serif;
+      background:var(--iv);
+      color:var(--tx);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    /* Same radial glow as landing */
+    body::before{
+      content:'';
+      position:fixed;inset:0;pointer-events:none;
+      background:
+        radial-gradient(ellipse at 20% 50%,rgba(196,160,68,0.06) 0%,transparent 60%),
+        radial-gradient(ellipse at 80% 50%,rgba(196,160,68,0.06) 0%,transparent 60%);
+    }
+
+    /* Corner ornaments — same as landing .lco */
+    .lco{position:fixed;pointer-events:none;opacity:0.22;}
+    .c1{top:10px;left:10px}.c2{top:10px;right:10px;transform:scaleX(-1)}
+    .c3{bottom:10px;left:10px;transform:scaleY(-1)}.c4{bottom:10px;right:10px;transform:scale(-1,-1)}
+
+    @keyframes ri{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+
+    .auth-wrap{
+      position:relative;z-index:1;
+      width:100%;max-width:400px;
+      padding:0 24px;
+      display:flex;flex-direction:column;
+      align-items:center;
+      animation:ri 0.8s ease 0.1s both;
+    }
+
+    /* Logo — same markup pattern as landing .lbr */
+    .auth-logo{
+      display:flex;align-items:center;gap:12px;
+      margin-bottom:28px;cursor:pointer;
+      text-decoration:none;
+    }
+    .auth-logo img{width:36px;height:36px;object-fit:contain;}
+    .auth-logo-text{
+      font-family:'Cinzel',serif;font-size:15px;
+      letter-spacing:0.22em;color:var(--g);
+    }
+
+    /* Card */
+    .auth-card{
+      width:100%;
+      background:rgba(255,252,245,0.7);
+      border:1px solid var(--bom);
+      border-radius:4px;
+      padding:36px 32px 32px;
+      box-shadow:0 8px 40px var(--shm);
+    }
+
+    .auth-title{
+      font-family:'Cinzel',serif;
+      font-size:10px;letter-spacing:0.38em;
+      color:var(--g);text-align:center;
+      margin-bottom:26px;
+      text-transform:uppercase;
+    }
+
+    /* Google button — styled like .lbtn but outlined */
+    .btn-google{
+      width:100%;
+      display:flex;align-items:center;justify-content:center;gap:10px;
+      padding:14px 20px;
+      background:white;
+      border:1px solid var(--bom);
+      border-radius:4px;
+      font-family:'Cinzel',serif;
+      font-size:10px;letter-spacing:0.22em;
+      color:var(--brm);
+      cursor:pointer;
+      transition:all 0.25s;
+      box-shadow:0 2px 8px var(--sh);
+    }
+    .btn-google:hover{
+      border-color:var(--g);
+      box-shadow:0 4px 16px var(--shm);
+      transform:translateY(-1px);
+    }
+
+    /* Divider */
+    .divider{
+      display:flex;align-items:center;gap:14px;
+      margin:22px 0;
+      color:var(--txl);
+      font-family:'EB Garamond',serif;
+      font-style:italic;font-size:15px;
+    }
+    .divider::before,.divider::after{
+      content:'';flex:1;height:1px;background:var(--bo);
+    }
+
+    /* Hint */
+    .auth-hint{
+      font-family:'EB Garamond',serif;font-style:italic;
+      font-size:14px;color:var(--txl);
+      text-align:center;margin-bottom:18px;line-height:1.55;
+    }
+
+    /* Fields */
+    .field{margin-bottom:16px;}
+    .field label{
+      display:block;
+      font-family:'Cinzel',serif;font-size:8px;
+      letter-spacing:0.32em;color:var(--g);
+      margin-bottom:7px;text-transform:uppercase;
+    }
+    .field input{
+      width:100%;
+      padding:11px 14px;
+      background:rgba(242,235,217,0.5);
+      border:1px solid var(--bom);
+      border-radius:2px;
+      font-family:'EB Garamond',serif;font-size:16px;
+      color:var(--br);outline:none;
+      transition:border-color 0.2s,background 0.2s;
+    }
+    .field input:focus{
+      border-color:var(--g);
+      background:rgba(255,252,245,0.9);
+    }
+    .field input::placeholder{
+      color:rgba(122,92,16,0.35);font-style:italic;
+    }
+
+    /* Continue button — same as .lbtn */
+    .btn-continue{
+      width:100%;
+      display:flex;align-items:center;justify-content:center;gap:14px;
+      padding:15px 48px;
+      background:linear-gradient(135deg,#7A5C10 0%,#9A7420 50%,#7A5C10 100%);
+      background-size:200% 100%;
+      border:none;border-radius:4px;
+      font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.28em;
+      color:var(--iv);cursor:pointer;
+      box-shadow:0 4px 20px rgba(122,92,16,0.3);
+      transition:all 0.3s;
+      margin-top:6px;
+    }
+    .btn-continue:hover{background-position:100% 0;transform:translateY(-1px);}
+    .lbo{color:rgba(242,235,217,0.6);font-size:12px;}
+
+    /* Error */
+    .auth-error{
+      display:none;
+      font-family:'EB Garamond',serif;font-style:italic;
+      font-size:14px;color:#8B2020;
+      text-align:center;margin-top:14px;
+    }
+
+    /* Loading */
+    .auth-loading{
+      display:none;
+      font-family:'Cinzel',serif;font-size:9px;
+      letter-spacing:0.28em;color:var(--gl);
+      text-align:center;margin-top:14px;
+    }
+    @keyframes pulse{0%,100%{opacity:0.5}50%{opacity:1}}
+    .auth-loading{animation:pulse 1.8s ease infinite;}
+  </style>
+</head>
+<body>
+
+  <!-- Corner ornaments -->
+  <svg class="lco c1" width="60" height="60" viewBox="0 0 60 60" fill="none">
+    <path d="M5 55 L5 5 L55 5" stroke="#C4A044" stroke-width="1.2" fill="none" opacity="0.6"/>
+    <circle cx="5" cy="5" r="3" fill="#C4A044" opacity="0.5"/>
+  </svg>
+  <svg class="lco c2" width="60" height="60" viewBox="0 0 60 60" fill="none">
+    <path d="M5 55 L5 5 L55 5" stroke="#C4A044" stroke-width="1.2" fill="none" opacity="0.6"/>
+    <circle cx="5" cy="5" r="3" fill="#C4A044" opacity="0.5"/>
+  </svg>
+  <svg class="lco c3" width="60" height="60" viewBox="0 0 60 60" fill="none">
+    <path d="M5 55 L5 5 L55 5" stroke="#C4A044" stroke-width="1.2" fill="none" opacity="0.6"/>
+    <circle cx="5" cy="5" r="3" fill="#C4A044" opacity="0.5"/>
+  </svg>
+  <svg class="lco c4" width="60" height="60" viewBox="0 0 60 60" fill="none">
+    <path d="M5 55 L5 5 L55 5" stroke="#C4A044" stroke-width="1.2" fill="none" opacity="0.6"/>
+    <circle cx="5" cy="5" r="3" fill="#C4A044" opacity="0.5"/>
+  </svg>
+
+  <div class="auth-wrap">
+
+    <!-- Logo — links back to landing -->
+    <a class="auth-logo" href="index.html">
+      <div style="font-size:26px;color:var(--g);">✦</div>
+      <div class="auth-logo-text">PARAMPARA</div>
+    </a>
+
+    <div class="auth-card">
+      <div class="auth-title">Enter the Lineage</div>
+
+      <!-- Google -->
+      <button class="btn-google" id="btn-google" onclick="signInWithGoogle()">
+        <svg width="18" height="18" viewBox="0 0 18 18">
+          <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/>
+          <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
+          <path fill="#FBBC05" d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z"/>
+          <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.961L3.964 7.293C4.672 5.163 6.656 3.58 9 3.58z"/>
+        </svg>
+        Continue with Google
+      </button>
+
+      <div class="divider">or</div>
+
+      <p class="auth-hint">New here? Enter your email and choose a password.<br>Returning? Just sign in below.</p>
+
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="auth-email" placeholder="your@email.com" autocomplete="email"/>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="auth-password" placeholder="••••••••" autocomplete="current-password"
+          onkeydown="if(event.key==='Enter')signInWithEmail()"/>
+      </div>
+
+      <button class="btn-continue" onclick="signInWithEmail()">
+        <span class="lbo">✦</span> CONTINUE <span class="lbo">✦</span>
+      </button>
+
+      <div class="auth-error" id="auth-error"></div>
+      <div class="auth-loading" id="auth-loading">Entering the lineage…</div>
+    </div>
+
+  </div>
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // ── Replace with your Supabase project values ──────────────────
+    const SUPABASE_URL      = 'YOUR_SUPABASE_URL';
+    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+    // ───────────────────────────────────────────────────────────────
+
+    const { createClient } = supabase;
+    const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    function showError(msg) {
+      const el = document.getElementById('auth-error');
+      el.textContent = msg;
+      el.style.display = 'block';
+    }
+    function clearError() {
+      document.getElementById('auth-error').style.display = 'none';
+    }
+    function showLoading(on) {
+      document.getElementById('auth-loading').style.display = on ? 'block' : 'none';
+    }
+
+    async function afterAuth(user) {
+      if (!user) return;
+      const { data: profile } = await sb
+        .from('profiles')
+        .select('covenant_accepted')
+        .eq('id', user.id)
+        .single();
+      if (profile?.covenant_accepted) {
+        window.location.href = 'home.html';   // returning user → app
+      } else {
+        window.location.href = 'covenant.html'; // new user → covenant
+      }
+    }
+
+    async function signInWithGoogle() {
+      clearError();
+      showLoading(true);
+      const { error } = await sb.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin + '/Parampara/covenant.html' }
+      });
+      if (error) { showLoading(false); showError(error.message); }
+    }
+
+    async function signInWithEmail() {
+      clearError();
+      const email    = document.getElementById('auth-email').value.trim();
+      const password = document.getElementById('auth-password').value;
+      if (!email || !password) { showError('Please enter your email and password.'); return; }
+      showLoading(true);
+
+      // Try sign-in first
+      let { data, error } = await sb.auth.signInWithPassword({ email, password });
+
+      if (error && (error.message.includes('Invalid login') || error.message.includes('Email not confirmed'))) {
+        // New user — create account
+        ({ data, error } = await sb.auth.signUp({ email, password }));
+      }
+
+      showLoading(false);
+      if (error) { showError(error.message); return; }
+
+      const user = data?.user || data?.session?.user;
+      afterAuth(user);
+    }
+
+    // Skip auth page if already signed in
+    window.addEventListener('load', async () => {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session) afterAuth(session.user);
+    });
+  </script>
+
+</body>
+</html>

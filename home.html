@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Parampara</title>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet"/>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+
+    :root{
+      --g:#7A5C10;--gm:#9A7420;--gl:#C4A044;--gb:#D4AD48;
+      --iv:#FDFAF3;--s:#FFFEF9;--s2:#F9F5E8;
+      --tx:#2C1E06;--txm:#5A4020;--txl:#8A7040;
+      --bo:rgba(122,92,16,0.18);--bo2:rgba(122,92,16,0.08);
+      --sh:rgba(50,32,8,0.08);--shm:rgba(50,32,8,0.16);
+      --br:#6B3F1A;--brm:#8B5A2B;
+    }
+
+    body{
+      font-family:'EB Garamond',serif;
+      background:var(--iv);
+      color:var(--tx);
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+    }
+
+    /* Background texture */
+    body::before{
+      content:'';
+      position:fixed;inset:0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(196,160,68,0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 80% at 80% 90%, rgba(122,92,16,0.05) 0%, transparent 60%);
+      pointer-events:none;z-index:0;
+    }
+
+    /* ── TOP NAV ── */
+    nav{
+      position:relative;z-index:10;
+      display:flex;align-items:center;justify-content:space-between;
+      padding:0 32px;
+      height:56px;
+      border-bottom:1px solid var(--bo);
+      background:rgba(253,250,243,0.95);
+      backdrop-filter:blur(8px);
+    }
+
+    .nav-logo{
+      font-family:'Cinzel',serif;
+      font-size:14px;letter-spacing:0.28em;
+      color:var(--g);text-decoration:none;
+    }
+
+    .nav-right{
+      display:flex;align-items:center;gap:20px;
+    }
+
+    .nav-btn{
+      font-family:'Cinzel',serif;font-size:8px;
+      letter-spacing:0.28em;color:var(--txl);
+      background:none;border:none;cursor:pointer;
+      padding:6px 10px;
+      transition:color 0.2s;
+    }
+    .nav-btn:hover{color:var(--g);}
+
+    .nav-signout{
+      font-family:'Cinzel',serif;font-size:8px;
+      letter-spacing:0.22em;color:var(--txl);
+      background:none;border:1px solid var(--bo);
+      cursor:pointer;padding:6px 14px;border-radius:2px;
+      transition:all 0.2s;
+    }
+    .nav-signout:hover{color:var(--g);border-color:var(--g);}
+
+    .nav-user{
+      font-family:'EB Garamond',serif;font-style:italic;
+      font-size:13px;color:var(--txl);
+    }
+
+    /* ── MAIN ── */
+    main{
+      position:relative;z-index:1;
+      flex:1;
+      display:flex;flex-direction:column;
+      align-items:center;
+      padding:64px 24px 48px;
+    }
+
+    .page-title{
+      font-family:'Cormorant Garamond',serif;
+      font-size:13px;font-weight:400;
+      letter-spacing:0.32em;
+      color:var(--gl);
+      text-transform:uppercase;
+      margin-bottom:10px;
+    }
+
+    .page-greeting{
+      font-family:'Cormorant Garamond',serif;
+      font-size:32px;font-weight:300;font-style:italic;
+      color:var(--tx);
+      margin-bottom:8px;
+      text-align:center;
+    }
+
+    .page-sub{
+      font-family:'EB Garamond',serif;font-style:italic;
+      font-size:15px;color:var(--txl);
+      margin-bottom:56px;
+      text-align:center;
+    }
+
+    /* ── TILES ── */
+    .tiles{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:20px;
+      width:100%;
+      max-width:860px;
+    }
+
+    .tile{
+      background:var(--s);
+      border:1px solid var(--bo2);
+      border-radius:6px;
+      padding:32px 24px 28px;
+      cursor:pointer;
+      transition:border-color 0.25s, box-shadow 0.25s, transform 0.2s;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .tile::before{
+      content:'';
+      position:absolute;top:0;left:0;right:0;
+      height:2px;
+      background:linear-gradient(90deg, var(--gl), var(--g));
+      opacity:0;
+      transition:opacity 0.25s;
+    }
+
+    .tile:hover{
+      border-color:var(--bo);
+      box-shadow:0 8px 32px var(--sh);
+      transform:translateY(-2px);
+    }
+
+    .tile:hover::before{opacity:1;}
+
+    .tile-icon{
+      font-size:22px;
+      margin-bottom:16px;
+      opacity:0.7;
+    }
+
+    .tile-title{
+      font-family:'Cormorant Garamond',serif;
+      font-size:20px;font-weight:600;
+      color:var(--g);
+      margin-bottom:10px;
+      line-height:1.2;
+    }
+
+    .tile-desc{
+      font-family:'EB Garamond',serif;
+      font-size:14px;color:var(--txl);
+      line-height:1.6;
+    }
+
+    .tile-arrow{
+      position:absolute;bottom:20px;right:20px;
+      font-size:16px;color:var(--bo);
+      transition:color 0.25s, transform 0.25s;
+    }
+    .tile:hover .tile-arrow{
+      color:var(--gl);
+      transform:translate(2px,-2px);
+    }
+
+    /* Ornament divider */
+    .ornament{
+      margin:56px 0 0;
+      display:flex;align-items:center;gap:16px;
+      opacity:0.4;
+    }
+    .ornament-line{width:80px;height:1px;background:var(--g);}
+    .ornament-dot{width:4px;height:4px;background:var(--gl);border-radius:50%;}
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:700px){
+      .tiles{grid-template-columns:1fr;}
+      main{padding:40px 16px 32px;}
+      .page-greeting{font-size:26px;}
+      nav{padding:0 16px;}
+    }
+    @media(min-width:701px) and (max-width:900px){
+      .tiles{grid-template-columns:1fr 1fr;}
+      .tile:last-child{grid-column:1/-1;max-width:420px;justify-self:center;}
+    }
+
+    /* Fade-in animation */
+    @keyframes fadeUp{
+      from{opacity:0;transform:translateY(16px);}
+      to{opacity:1;transform:translateY(0);}
+    }
+    .page-title{animation:fadeUp 0.5s ease both;}
+    .page-greeting{animation:fadeUp 0.5s 0.1s ease both;}
+    .page-sub{animation:fadeUp 0.5s 0.2s ease both;}
+    .tile:nth-child(1){animation:fadeUp 0.5s 0.3s ease both;}
+    .tile:nth-child(2){animation:fadeUp 0.5s 0.4s ease both;}
+    .tile:nth-child(3){animation:fadeUp 0.5s 0.5s ease both;}
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a class="nav-logo" href="index.html">PARAMPARA</a>
+    <div class="nav-right">
+      <span class="nav-user" id="nav-user-name"></span>
+      <button class="nav-btn" onclick="window.location.href='index.html'">STATISTICS</button>
+      <button class="nav-signout" onclick="signOut()">SIGN OUT</button>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main>
+    <div class="page-title">Welcome</div>
+    <div class="page-greeting" id="greeting">Enter the Lineage</div>
+    <div class="page-sub">What would you like to explore today?</div>
+
+    <div class="tiles">
+
+      <!-- Tile 1: Your Profile & Lineage -->
+      <div class="tile" onclick="window.location.href='profile.html'">
+        <div class="tile-icon">✦</div>
+        <div class="tile-title">Your Profile &amp; Lineage</div>
+        <div class="tile-desc">See the lineage you carry. Find your place in the Parampara and explore your guru-shishya chain across generations.</div>
+        <div class="tile-arrow">↗</div>
+      </div>
+
+      <!-- Tile 2: Living Bridges -->
+      <div class="tile" onclick="window.location.href='index.html#bridges'">
+        <div class="tile-icon">◈</div>
+        <div class="tile-title">Living Bridges</div>
+        <div class="tile-desc">Explore the key artists whose lineages span generations. Discover the living connections that carry this music forward.</div>
+        <div class="tile-arrow">↗</div>
+      </div>
+
+      <!-- Tile 3: Kshetra-Kriti Map -->
+      <div class="tile" onclick="window.location.href='index.html#kshetra'">
+        <div class="tile-icon">⊕</div>
+        <div class="tile-title">Kshetra-Kriti Map</div>
+        <div class="tile-desc">Navigate temples and compositions across South India. Explore how sacred spaces and musical works are woven together across centuries.</div>
+        <div class="tile-arrow">↗</div>
+      </div>
+
+    </div>
+
+    <div class="ornament">
+      <div class="ornament-line"></div>
+      <div class="ornament-dot"></div>
+      <div class="ornament-line"></div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL      = 'YOUR_SUPABASE_URL';
+    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+
+    const { createClient } = supabase;
+    const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    async function signOut() {
+      await sb.auth.signOut();
+      window.location.href = 'index.html';
+    }
+
+    window.addEventListener('load', async () => {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) {
+        window.location.href = 'auth.html';
+        return;
+      }
+
+      // Show user's name in nav
+      const name = session.user.user_metadata?.full_name || session.user.email;
+      const first = name.split(' ')[0];
+      document.getElementById('nav-user-name').textContent = name;
+      document.getElementById('greeting').textContent = 'Welcome back, ' + first;
+    });
+  </script>
+</body>
+</html>
