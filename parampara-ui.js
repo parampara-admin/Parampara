@@ -77,9 +77,7 @@ window.addEventListener('load', async () => {
 
   const { data: { session } } = await db.auth.getSession();
   if (session) {
-    showSc('ss');
-    if (!loaded) await loadStats();
-    document.getElementById('home-tiles').style.display='flex';document.getElementById('stats-loaded').style.display='none';
+    window.location.href='home.html';
     if (view === 'bridges') {
       const btn = document.querySelector('.vtab[onclick*=bridges]');
       if (btn) switchView('bridges', btn);
@@ -91,9 +89,7 @@ window.addEventListener('load', async () => {
     // Try refreshing the session once
     const { data: { session: s2 } } = await db.auth.refreshSession();
     if (s2) {
-      showSc('ss');
-      if (!loaded) await loadStats();
-      document.getElementById('home-tiles').style.display='flex';document.getElementById('stats-loaded').style.display='none';
+      window.location.href='home.html';
     } else {
       showSc('sl');
     }
