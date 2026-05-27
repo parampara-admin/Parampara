@@ -104,8 +104,8 @@ window.addEventListener('load',async()=>{
     if(!goto){window.location.href='home.html';return;}
     showSc('ss');
     document.getElementById('stats-loaded').style.display='flex';
-    await loadStats();
-    handleGoto();
+    loadStats();
+    setTimeout(()=>handleGoto(),1000);
   }else{
     const{data:{session:s2}}=await db.auth.refreshSession();
     if(s2){
@@ -113,8 +113,8 @@ window.addEventListener('load',async()=>{
       if(!goto){window.location.href='home.html';return;}
       showSc('ss');
       document.getElementById('stats-loaded').style.display='flex';
-      await loadStats();
-      handleGoto();
+      loadStats();
+      setTimeout(()=>handleGoto(),1000);
     }else{showSc('sl');}
   }
 });
