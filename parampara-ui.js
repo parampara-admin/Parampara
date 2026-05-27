@@ -90,25 +90,32 @@ async function handleGoto(){
       if(btn){switchView('kshetra',btn);}
       else{document.getElementById('view-kshetra').classList.add('active');}
     },300);
+  }else if(goto==='profile'){showProfScreen();}
   }else{
     if(!loaded)loadStats();
   }
 }
 
 window.addEventListener('load',async()=>{
-  const params=new URLSearchParams(window.location.search);
-  const goto=params.get('goto');
   history.replaceState(null,'',window.location.pathname);
   const{data:{session}}=await db.auth.getSession();
   if(session){
+    const goto=sessionStorage.getItem('goto');
     if(!goto){window.location.href='home.html';return;}
     showSc('ss');
     document.getElementById('stats-loaded').style.display='flex';
     await loadStats();
-    if(goto==='bridges'){const btn=document.querySelector('.vtab[onclick*=bridges]');if(btn)switchView('bridges',btn);}
-    else if(goto==='kshetra'){const btn=document.querySelector('.vtab[onclick*=kshetra]');if(btn)switchView('kshetra',btn);}
+    handleGoto();
   }else{
-    showSc('sl');
+    const{data:{session:s2}}=await db.auth.refreshSession();
+    if(s2){
+      const goto=sessionStorage.getItem('goto');
+      if(!goto){window.location.href='home.html';return;}
+      showSc('ss');
+      document.getElementById('stats-loaded').style.display='flex';
+      await loadStats();
+      handleGoto();
+    }else{showSc('sl');}
   }
 });
 // View tab switching
