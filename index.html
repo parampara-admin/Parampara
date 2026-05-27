@@ -253,6 +253,28 @@
         </div>
       </div>
 
+      <!-- PROFILE SEARCH -->
+<div class="sc" id="sprofile">
+  <div class="sbdy" style="padding:32px;max-width:600px;margin:0 auto;">
+    <div id="profile-search-view" style="display:flex;flex-direction:column;">
+      <div style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.32em;color:var(--gl);margin-bottom:12px;">HERITAGE LEDGER</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;font-style:italic;color:var(--tx);margin-bottom:32px;">Find Your Place in the Parampara</div>
+      <div style="position:relative;margin-bottom:12px;">
+        <input id="prof-input" type="text" placeholder="Enter your name…" autocomplete="off" onkeydown="if(event.key==='Enter')profSearch()" style="width:100%;padding:14px 48px 14px 20px;font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--tx);background:var(--s);border:1px solid var(--bo);border-radius:3px;outline:none;box-sizing:border-box;"/>
+        <button onclick="profSearch()" style="position:absolute;right:0;top:0;bottom:0;width:48px;background:none;border:none;cursor:pointer;color:var(--gl);font-size:20px;">→</button>
+      </div>
+      <div style="font-family:'EB Garamond',serif;font-style:italic;font-size:13px;color:var(--txl);">Try partial names — e.g. "Sanjay" or "Subrahmanyan"</div>
+      <div id="prof-loading" style="display:none;margin-top:16px;font-family:'EB Garamond',serif;font-style:italic;color:var(--txl);">Consulting the heritage ledger…</div>
+    </div>
+    <div id="profile-results-view" style="display:none;flex-direction:column;margin-top:16px;"></div>
+    <div id="profile-notfound-view" style="display:none;flex-direction:column;align-items:center;margin-top:32px;text-align:center;">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-style:italic;color:var(--tx);margin-bottom:8px;">Not yet in the Ledger</div>
+      <div id="prof-nf-msg" style="font-family:'EB Garamond',serif;font-style:italic;font-size:15px;color:var(--txl);margin-bottom:20px;"></div>
+      <button onclick="showProfSearch()" style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:0.2em;color:var(--txl);background:none;border:1px solid var(--bo);padding:8px 20px;border-radius:2px;cursor:pointer;">SEARCH AGAIN</button>
+    </div>
+    <div id="profile-detail-view" style="display:none;flex-direction:column;margin-top:16px;"></div>
+  </div>
+</div>
       <!-- LINEAGES TAB -->
       <div class="view-panel" id="view-lineages" style="overflow-y:auto;">
         <div class="bani-intro">
