@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kshetra-Kriti Map · Parampara</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root{
+  --iv:#F2EBD9;--ivm:#EAE0C8;
+  --g:#7A5C10;--gm:#9A7420;--gl:#C4A044;--gb:#D4AD48;
+  --br:#2E1F04;--brm:#4A3010;
+  --tx:#2C1E06;--txm:#5A4020;--txl:#8A7040;
+  --tl:#2A6060;--tll:#3A8080;
+  --bo:rgba(122,92,16,0.15);--bom:rgba(122,92,16,0.30);
+  --sh:rgba(50,32,8,0.08);--shm:rgba(50,32,8,0.16);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;}
+body{font-family:'EB Garamond',serif;background:var(--iv);color:var(--tx);display:flex;flex-direction:column;}
+
+/* NAV */
+.nav{
+  flex-shrink:0;height:56px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 32px;background:rgba(242,235,217,0.97);border-bottom:1px solid var(--bo);
+  backdrop-filter:blur(8px);z-index:20;
+}
+.nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-logo{font-family:'Cinzel',serif;font-size:15px;letter-spacing:0.2em;color:var(--g);}
+.nav-div{width:1px;height:18px;background:var(--bom);}
+.nav-sub{font-family:'EB Garamond',serif;font-style:italic;font-size:14px;color:var(--txl);}
+.nav-back{
+  display:flex;align-items:center;gap:8px;padding:8px 18px;
+  border:1px solid var(--bom);border-radius:2px;background:none;
+  font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.18em;
+  color:var(--g);cursor:pointer;transition:all 0.2s;text-decoration:none;
+}
+.nav-back:hover{background:rgba(196,160,68,0.1);border-color:var(--gl);}
+
+/* MAIN LAYOUT */
+.main{flex:1;display:flex;overflow:hidden;min-height:0;}
+
+/* SIDEBAR */
+.km-sidebar{
+  width:290px;flex-shrink:0;height:100%;
+  background:rgba(242,235,217,0.98);
+  border-right:1px solid var(--bo);
+  display:flex;flex-direction:column;
+  overflow-y:auto;overflow-x:hidden;
+  z-index:10;
+  box-shadow:2px 0 12px var(--sh);
+}
+.km-sidebar-header{
+  padding:20px 18px 14px;
+  background:linear-gradient(135deg,rgba(122,92,16,0.07),rgba(196,160,68,0.04));
+  border-bottom:1px solid var(--bo);flex-shrink:0;
+}
+.km-sidebar-title{font-family:'Cinzel',serif;font-size:12px;letter-spacing:0.18em;color:var(--g);margin-bottom:5px;}
+.km-sidebar-sub{font-family:'EB Garamond',serif;font-style:italic;font-size:13px;color:var(--txl);line-height:1.4;}
+.km-section{padding:14px 18px 10px;border-bottom:1px solid var(--bo);}
+.km-label{font-family:'Cinzel',serif;font-size:7px;letter-spacing:0.22em;color:var(--txl);margin-bottom:8px;text-transform:uppercase;}
+
+/* Custom dropdown */
+.km-dropdown{position:relative;width:100%;}
+.km-dropdown-btn{
+  width:100%;padding:9px 32px 9px 10px;
+  background:white;border:1px solid var(--bom);border-radius:2px;
+  font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--br);
+  cursor:pointer;text-align:left;outline:none;letter-spacing:0.02em;
+  transition:border-color 0.2s;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237A5C10'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.km-dropdown-btn:hover,.km-dropdown-btn.open{border-color:var(--g);}
+.km-dropdown-list{
+  position:fixed;z-index:9999;
+  background:var(--iv);border:1px solid var(--bom);border-radius:3px;
+  box-shadow:0 8px 32px rgba(46,31,4,0.18);
+  overflow-y:auto;max-height:260px;display:none;
+}
+.km-dropdown-list.open{display:block;}
+.km-dropdown-item{
+  padding:10px 14px;cursor:pointer;
+  font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--br);
+  border-bottom:1px solid rgba(122,92,16,0.07);transition:background 0.12s;
+  display:flex;align-items:center;gap:8px;
+}
+.km-dropdown-item:last-child{border-bottom:none;}
+.km-dropdown-item:hover{background:rgba(196,160,68,0.1);}
+.km-dropdown-item.selected{background:rgba(196,160,68,0.15);color:var(--g);}
+.km-dropdown-swatch{width:16px;height:4px;border-radius:2px;flex-shrink:0;}
+
+/* Legend */
+.km-legend-row{display:flex;align-items:center;gap:8px;font-family:'EB Garamond',serif;font-size:15px;color:var(--txm);margin-bottom:6px;}
+.km-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;box-shadow:0 1px 3px rgba(0,0,0,0.2);}
+.km-legend-filter{cursor:pointer;border-radius:6px;padding:3px 6px 3px 3px;margin-left:-3px;transition:background 0.18s,color 0.18s;}
+.km-legend-filter:hover{background:rgba(122,92,16,0.07);}
+.km-legend-filter.km-lf-active{background:rgba(196,160,68,0.15);color:var(--g);font-weight:500;}
+
+/* Stats */
+.km-stats-row{display:flex;align-items:baseline;gap:6px;margin-bottom:4px;}
+.km-stats-num{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600;color:var(--g);line-height:1;}
+.km-stats-lbl{font-family:'Cinzel',serif;font-size:8px;letter-spacing:0.14em;color:var(--txl);}
+
+/* Route panel */
+.km-route-panel{border-top:1px solid var(--bo);overflow-y:auto;flex:1;min-height:0;display:flex;flex-direction:column;}
+.km-route-info{padding:12px 18px 8px;font-family:'EB Garamond',serif;font-style:italic;font-size:13px;color:var(--txm);line-height:1.5;border-bottom:1px solid var(--bo);}
+.km-route-stops{flex:1;overflow-y:auto;padding:8px 0;}
+.km-stop-item{display:flex;align-items:flex-start;gap:10px;padding:8px 18px;cursor:pointer;transition:background 0.15s;border-bottom:1px solid rgba(122,92,16,0.07);}
+.km-stop-item:hover{background:rgba(196,160,68,0.08);}
+.km-stop-item.active{background:rgba(196,160,68,0.15);}
+.km-stop-num{width:20px;height:20px;border-radius:50%;flex-shrink:0;background:var(--g);color:var(--iv);font-family:'Cinzel',serif;font-size:9px;display:flex;align-items:center;justify-content:center;margin-top:2px;}
+.km-stop-item.active .km-stop-num{background:var(--tl);}
+.km-stop-body{flex:1;min-width:0;}
+.km-stop-name{font-family:'EB Garamond',serif;font-size:14px;color:var(--br);line-height:1.3;margin-bottom:2px;}
+.km-stop-kriti{font-family:'EB Garamond',serif;font-style:italic;font-size:12px;color:var(--g);}
+
+/* Zoom controls */
+.km-zoom-controls{margin-top:auto;padding:14px 18px;display:flex;gap:6px;border-top:1px solid var(--bo);}
+.km-zoom-btn{flex:1;padding:8px 0;background:white;border:1px solid var(--bom);border-radius:2px;font-family:'Cinzel',serif;font-size:16px;color:var(--g);cursor:pointer;transition:all 0.15s;}
+.km-zoom-btn:hover{background:rgba(196,160,68,0.12);border-color:var(--g);}
+
+/* Map */
+.km-map-wrap{flex:1;position:relative;overflow:hidden;height:100%;min-width:0;}
+#km-leaflet{width:100%;height:100%;}
+.km-loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--iv);z-index:5;}
+@keyframes sp{to{transform:rotate(360deg)}}
+.lsp{font-size:26px;color:var(--gl);animation:sp 3s linear infinite;}
+.ltx{font-family:'EB Garamond',serif;font-style:italic;font-size:15px;color:var(--txl);margin-top:12px;}
+
+/* Popup */
+.km-popup{
+  position:absolute;top:16px;right:16px;
+  width:310px;max-height:calc(100% - 32px);
+  background:var(--iv);border:1px solid var(--bom);border-radius:4px;
+  box-shadow:0 12px 48px rgba(46,31,4,0.22);
+  overflow-y:auto;z-index:1000;
+}
+.km-popup::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gl),var(--gb));}
+.km-popup-close{position:absolute;top:10px;right:12px;background:none;border:none;color:var(--txl);font-size:14px;cursor:pointer;padding:4px;line-height:1;}
+.km-popup-close:hover{color:var(--g);}
+.km-popup-tradition{padding:14px 16px 2px;font-family:'Cinzel',serif;font-size:7px;letter-spacing:0.24em;color:var(--txl);}
+.km-popup-name{padding:0 36px 4px 16px;font-family:'Cormorant Garamond',serif;font-size:21px;font-weight:500;color:var(--br);line-height:1.2;}
+.km-popup-location{padding:0 16px 3px;font-family:'EB Garamond',serif;font-size:13px;color:var(--txl);}
+.km-popup-deity{padding:0 16px 6px;font-family:'EB Garamond',serif;font-style:italic;font-size:14px;color:var(--txm);}
+.km-popup-badges{padding:0 16px 8px;display:flex;gap:6px;flex-wrap:wrap;}
+.km-badge{padding:3px 8px;border-radius:20px;font-family:'Cinzel',serif;font-size:7px;letter-spacing:0.14em;background:rgba(122,92,16,0.1);color:var(--g);border:1px solid rgba(122,92,16,0.2);}
+.km-badge.pancha{background:rgba(139,94,16,0.12);color:#7A5010;border-color:rgba(196,160,68,0.4);}
+.km-badge.divya{background:rgba(42,96,96,0.1);color:var(--tl);border-color:rgba(42,96,96,0.3);}
+.km-popup-sig{padding:0 16px 12px;font-family:'EB Garamond',serif;font-size:14px;color:var(--txm);line-height:1.6;}
+.km-popup-kritis-label{padding:8px 16px 6px;font-family:'Cinzel',serif;font-size:7px;letter-spacing:0.2em;color:var(--g);border-top:1px solid var(--bo);}
+.km-popup-kritis{padding:0 16px 14px;}
+.km-kriti-card{background:white;border:1px solid var(--bo);border-radius:3px;padding:10px 12px;margin-bottom:8px;position:relative;overflow:hidden;}
+.km-kriti-card:last-child{margin-bottom:0;}
+.km-kriti-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--gl),var(--gb));}
+.km-kriti-title{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:500;color:var(--br);margin-bottom:2px;}
+.km-kriti-composer{font-family:'Cinzel',serif;font-size:7px;letter-spacing:0.14em;margin-bottom:3px;}
+.km-kriti-meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px;}
+.km-kriti-tag{font-family:'EB Garamond',serif;font-style:italic;font-size:12px;color:var(--txl);}
+.km-kriti-cycle{font-family:'Cinzel',serif;font-size:7px;letter-spacing:0.1em;color:var(--tl);background:rgba(42,96,96,0.08);padding:2px 6px;border-radius:10px;display:inline-block;margin-bottom:4px;}
+.km-kriti-sig{font-family:'EB Garamond',serif;font-size:13px;color:var(--txm);line-height:1.5;}
+
+/* Playbar */
+.km-playbar{
+  position:absolute;bottom:24px;left:50%;transform:translateX(-50%);
+  z-index:1000;background:rgba(242,235,217,0.97);border:1px solid var(--bom);border-radius:40px;
+  padding:10px 20px;display:flex;align-items:center;gap:16px;
+  box-shadow:0 8px 32px rgba(46,31,4,0.22);backdrop-filter:blur(8px);min-width:320px;
+}
+.km-playbar-route{font-family:'Cinzel',serif;font-size:8px;letter-spacing:0.18em;color:var(--g);white-space:nowrap;max-width:120px;overflow:hidden;text-overflow:ellipsis;}
+.km-playbar-controls{display:flex;align-items:center;gap:6px;}
+.km-playbar-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--bom);background:white;color:var(--g);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.18s;flex-shrink:0;}
+.km-playbar-btn:hover{background:var(--ivm);border-color:var(--g);}
+.km-playbar-btn:disabled{opacity:0.35;cursor:not-allowed;}
+.km-playbar-play{width:42px;height:42px;background:var(--g);color:var(--iv);border-color:var(--g);}
+.km-playbar-play:hover{background:var(--gm);}
+.km-playbar-progress{display:flex;flex-direction:column;gap:4px;min-width:100px;}
+.km-playbar-track{height:3px;background:var(--bo);border-radius:2px;overflow:hidden;}
+.km-playbar-fill{height:100%;background:linear-gradient(90deg,var(--gl),var(--gb));border-radius:2px;transition:width 0.5s ease;width:0%;}
+.km-playbar-step{font-family:'Cinzel',serif;font-size:7px;letter-spacing:0.16em;color:var(--txl);text-align:right;}
+
+/* Tooltip */
+.km-tooltip{background:var(--iv) !important;border:1px solid var(--bom) !important;border-radius:2px !important;padding:4px 8px !important;font-family:'EB Garamond',serif !important;font-size:13px !important;color:var(--br) !important;box-shadow:0 2px 8px var(--sh) !important;white-space:nowrap !important;}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="home.html" class="nav-brand">
+    <span class="nav-logo">PARAMPARA</span>
+    <span class="nav-div"></span>
+    <span class="nav-sub">Kshetra-Kriti Map</span>
+  </a>
+  <a href="home.html" class="nav-back">← Back</a>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- SIDEBAR -->
+  <div class="km-sidebar">
+    <div class="km-sidebar-header">
+      <div class="km-sidebar-title">KSHETRA-KRITI MAP</div>
+      <div class="km-sidebar-sub" id="km-sidebar-sub">Sacred temples &amp; the compositions they inspired</div>
+    </div>
+
+    <!-- Composer filter -->
+    <div class="km-section">
+      <div class="km-label">FILTER BY COMPOSER</div>
+      <div class="km-dropdown" id="km-composer-dd">
+        <button class="km-dropdown-btn" id="km-composer-btn" data-val="all" onclick="kmToggleDD('km-composer-dd')">All Composers</button>
+        <div class="km-dropdown-list" id="km-composer-list">
+          <div class="km-dropdown-item selected" onclick="kmPickComposer('all','All Composers')">All Composers</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tradition legend -->
+    <div class="km-section">
+      <div class="km-label">TRADITION</div>
+      <div class="km-legend-row km-legend-filter" id="lf-shaivite" onclick="kmSetTraditionFilter('shaivite')">
+        <div class="km-dot" style="background:#B5651D;border:1.5px solid #8B3A0F;"></div>Shaivite
+      </div>
+      <div class="km-legend-row km-legend-filter" id="lf-vaishnavite" onclick="kmSetTraditionFilter('vaishnavite')">
+        <div class="km-dot" style="background:#1A7A6E;border:1.5px solid #0E5A52;"></div>Vaishnavite
+      </div>
+      <div class="km-legend-row km-legend-filter" id="lf-pancha" onclick="kmSetTraditionFilter('pancha')">
+        <div class="km-dot" style="background:#E8A020;border:1.5px solid #C4A044;"></div>Pancha Bhuta Stala
+      </div>
+      <div class="km-legend-row km-legend-filter" id="lf-divya" onclick="kmSetTraditionFilter('divya')">
+        <div class="km-dot" style="background:#2ABCBC;border:1.5px solid #1A9090;border-radius:2px;"></div>Divya Desam
+      </div>
+    </div>
+
+    <!-- Route selector -->
+    <div class="km-section" id="km-route-section" style="display:none;">
+      <div class="km-label">PILGRIMAGE ROUTE</div>
+      <div class="km-dropdown" id="km-route-dd">
+        <button class="km-dropdown-btn" id="km-route-btn" onclick="kmToggleDD('km-route-dd')">— Select a route —</button>
+        <div class="km-dropdown-list" id="km-route-list"></div>
+      </div>
+    </div>
+
+    <!-- Pilgrim planner -->
+    <div class="km-section">
+      <div class="km-label">PLAN A PILGRIMAGE</div>
+      <div class="km-dropdown" id="km-city-dd">
+        <button class="km-dropdown-btn" id="km-city-btn" onclick="kmToggleDD('km-city-dd')">— Select a city —</button>
+        <div class="km-dropdown-list" id="km-city-list"></div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="km-section">
+      <div class="km-stats-row">
+        <div class="km-stats-num" id="km-stat-temples">—</div>
+        <div class="km-stats-lbl">TEMPLES</div>
+      </div>
+      <div class="km-stats-row">
+        <div class="km-stats-num" id="km-stat-kritis">—</div>
+        <div class="km-stats-lbl">KRITIS</div>
+      </div>
+    </div>
+
+    <!-- Route stops list -->
+    <div class="km-route-panel" id="km-route-panel" style="display:none;">
+      <div class="km-route-info" id="km-route-info"></div>
+      <div class="km-route-stops" id="km-route-stops"></div>
+    </div>
+
+    <!-- Zoom -->
+    <div class="km-zoom-controls">
+      <button class="km-zoom-btn" onclick="kmZoomIn()">+</button>
+      <button class="km-zoom-btn" onclick="kmZoomOut()">−</button>
+      <button class="km-zoom-btn" onclick="kmResetView()" style="font-size:10px;letter-spacing:0;">RESET</button>
+    </div>
+  </div>
+
+  <!-- MAP -->
+  <div class="km-map-wrap" id="km-map-wrap">
+    <div class="km-loading" id="km-loading">
+      <div class="lsp">✦</div>
+      <div class="ltx">Loading sacred map…</div>
+    </div>
+    <div id="km-leaflet" style="display:none;"></div>
+
+    <!-- Popup -->
+    <div class="km-popup" id="km-popup" style="display:none;">
+      <button class="km-popup-close" onclick="kmClosePopup()">✕</button>
+      <div class="km-popup-tradition" id="km-popup-tradition"></div>
+      <div class="km-popup-name" id="km-popup-name"></div>
+      <div class="km-popup-location" id="km-popup-location"></div>
+      <div class="km-popup-deity" id="km-popup-deity"></div>
+      <div class="km-popup-badges" id="km-popup-badges"></div>
+      <div class="km-popup-sig" id="km-popup-sig"></div>
+      <div class="km-popup-kritis-label" id="km-popup-kritis-label" style="display:none;"></div>
+      <div class="km-popup-kritis" id="km-popup-kritis"></div>
+    </div>
+
+    <!-- Playbar -->
+    <div class="km-playbar" id="km-playbar" style="display:none;">
+      <div class="km-playbar-route" id="km-playbar-route"></div>
+      <div class="km-playbar-controls">
+        <button class="km-playbar-btn" id="km-pb-prev" onclick="kmStepRoute(-1)">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><path d="M9 2L4 7l5 5V2z"/></svg>
+        </button>
+        <button class="km-playbar-btn km-playbar-play" onclick="kmPlayRoute()">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor" id="km-pb-play-icon"><path d="M5 3.5l10 5.5-10 5.5z"/></svg>
+        </button>
+        <button class="km-playbar-btn" id="km-pb-next" onclick="kmStepRoute(1)">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><path d="M5 2l5 5-5 5V2z"/></svg>
+        </button>
+      </div>
+      <div class="km-playbar-progress">
+        <div class="km-playbar-track"><div class="km-playbar-fill" id="km-pb-fill"></div></div>
+        <div class="km-playbar-step" id="km-pb-step"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SU = 'https://enxhnemcgbicfxzrfveh.supabase.co';
+const SK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVueGhuZW1jZ2JpY2Z4enJmdmVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczODQ0ODMsImV4cCI6MjA5Mjk2MDQ4M30.zTBJ5DAs4v965Dmy4wCfcSWa5eIVFGnf8XvXEFuBDpE';
+const { createClient } = supabase;
+const db = createClient(SU, SK);
+
+const KM_ROUTE_COLORS = {
+  'Navagraha Kshetra Yatra':  { line:'#E8A020', pin:'#E8A020', bg:'rgba(232,160,32,0.15)' },
+  'Pancha Bhuta Stala Yatra': { line:'#C0392B', pin:'#C0392B', bg:'rgba(192,57,43,0.15)'  },
+  'Arupadai Veedu Yatra':     { line:'#8E44AD', pin:'#8E44AD', bg:'rgba(142,68,173,0.15)' },
+  'Pancharatna Circuit':      { line:'#2471A3', pin:'#2471A3', bg:'rgba(36,113,163,0.15)' },
+  'Wari Pilgrimage Route':    { line:'#1E8449', pin:'#1E8449', bg:'rgba(30,132,73,0.15)'  },
+  'Carnatic Pilgrimage':      { line:'#C4A044', pin:'#C4A044', bg:'rgba(196,160,68,0.15)' }
+};
+
+const KM_COMPOSERS = [
+  { id: 'cd478bac-fc19-4fc7-b30a-4045a97b9806', name: 'Muthuswami Dikshitar',          color: '#8B5E10' },
+  { id: 'b6dbb72e-0cc3-43e2-a997-a291778a449e', name: 'Tyagaraja',                      color: '#8B3A0F' },
+  { id: 'f4cd87e3-ea8e-4850-a7b6-62db009a085c', name: 'Syama Sastri',                   color: '#5C3A8C' },
+  { id: '4daf4cea-d672-46b0-b3e3-cf9ee2ad8596', name: 'Tallapaka Annamacharya',          color: '#1A6040' },
+  { id: '23c8f9c1-b6e3-42b8-bd3b-2a20d76f832a', name: 'Purandara Dasa',                 color: '#6B4A0F' },
+  { id: '589e0bab-6742-4cb8-80eb-9fe7ec88aaf9', name: 'Swati Tirunal',                  color: '#2A4080' },
+  { id: '10d1e3ae-5086-4fff-8d4b-cf7bd4978 2b6', name: 'Ootukkaadu Venkatakavi',         color: '#2A6060' },
+  { id: 'f14f0e83-ffb7-46d3-b28d-30a880970ae1', name: 'Mysore Vasudevachar',             color: '#4A6B0F' },
+  { id: 'db943134-ce2f-4a03-8529-471c8e09905e', name: 'Harikesanallur Muthiah Bhagavathar', color: '#7A2020' },
+  { id: 'b508190c-71c4-4f48-b9ae-4d97f76b384b', name: 'Papanasam Sivan',                color: '#0F5C6B' },
+];
+
+const KM_PILGRIM_CITIES = [
+  { name:'Bengaluru',          lat:12.9716, lng:77.5946 },
+  { name:'Chennai',            lat:13.0827, lng:80.2707 },
+  { name:'Coimbatore',         lat:11.0168, lng:76.9558 },
+  { name:'Hyderabad',          lat:17.3850, lng:78.4867 },
+  { name:'Kochi',              lat:9.9312,  lng:76.2673 },
+  { name:'Madurai',            lat:9.9252,  lng:78.1198 },
+  { name:'Mysuru',             lat:12.2958, lng:76.6394 },
+  { name:'Thanjavur',          lat:10.7870, lng:79.1378 },
+  { name:'Tiruchirapalli',     lat:10.7905, lng:78.7047 },
+  { name:'Tirupati',           lat:13.6288, lng:79.4192 },
+];
+
+let kmData = { temples:[], compositions:[], junctions:[] };
+let kmLoaded = false;
+let kmMap = null;
+let kmMarkers = [];
+let kmCurrentFilter = 'all';
+let kmTraditionFilter = 'all';
+let kmRouteData = [];
+let kmRouteLines = [];
+let kmRouteMarkers = [];
+let kmCurrentRoute = null;
+let kmPlayInterval = null;
+let kmPlayStep = 0;
+let kmOpenDD = null;
+
+function kmGetComposer(id){ return KM_COMPOSERS.find(x=>x.id===id)||{name:'Unknown',color:'#7A5C10'}; }
+
+function kmCleanName(name){ return (name||'').replace(/ HMB$/i,'').replace(/ Dikshitar$/i,'').replace(/ \(HMB\)$/i,'').trim(); }
+
+// ── DROPDOWN ──
+function kmToggleDD(id){
+  const dd=document.getElementById(id);
+  const list=dd.querySelector('.km-dropdown-list');
+  const btn=dd.querySelector('.km-dropdown-btn');
+  const isOpen=list.classList.contains('open');
+  if(kmOpenDD&&kmOpenDD!==id){
+    const prev=document.getElementById(kmOpenDD);
+    if(prev){prev.querySelector('.km-dropdown-list').classList.remove('open');prev.querySelector('.km-dropdown-btn').classList.remove('open');}
+  }
+  if(isOpen){list.classList.remove('open');btn.classList.remove('open');kmOpenDD=null;}
+  else{
+    const rect=btn.getBoundingClientRect();
+    list.style.left=rect.left+'px';list.style.top=(rect.bottom+2)+'px';list.style.width=rect.width+'px';
+    list.classList.add('open');btn.classList.add('open');kmOpenDD=id;
+  }
+}
+document.addEventListener('click',e=>{
+  if(kmOpenDD&&!e.target.closest('.km-dropdown')){
+    const dd=document.getElementById(kmOpenDD);
+    if(dd){dd.querySelector('.km-dropdown-list').classList.remove('open');dd.querySelector('.km-dropdown-btn').classList.remove('open');}
+    kmOpenDD=null;
+  }
+});
+
+function kmPickComposer(val,label){
+  const btn=document.getElementById('km-composer-btn');
+  btn.textContent=label;btn.dataset.val=val;
+  document.querySelectorAll('#km-composer-list .km-dropdown-item').forEach(el=>el.classList.toggle('selected',el.textContent.trim()===label));
+  document.getElementById('km-composer-list').classList.remove('open');btn.classList.remove('open');kmOpenDD=null;
+  kmFilterComposer(val);
+}
+
+function kmPickRoute(val,label){
+  document.getElementById('km-route-btn').textContent=label||'— Select a route —';
+  document.getElementById('km-route-list').classList.remove('open');
+  document.getElementById('km-route-btn').classList.remove('open');kmOpenDD=null;
+  if(val)kmSelectRoute(val);
+}
+
+// ── INIT ──
+async function kmInit(){
+  try{
+    const [r1,r2,r3]=await Promise.all([
+      db.from('kshetras').select('*').limit(500),
+      db.from('compositions').select('id,title,composer_id,raga,tala,language,form,metadata').limit(500),
+      db.from('composition_kshetra').select('composition_id,kshetra_id').limit(500)
+    ]);
+    kmData.temples=( r1.data||[]).filter(t=>t.latitude&&t.longitude);
+    kmData.compositions=r2.data||[];
+    kmData.junctions=r3.data||[];
+
+    // Fill composer dropdown
+    const list=document.getElementById('km-composer-list');
+    KM_COMPOSERS.forEach(c=>{
+      if(kmData.compositions.some(x=>x.composer_id===c.id)){
+        const item=document.createElement('div');
+        item.className='km-dropdown-item';item.textContent=c.name;
+        item.onclick=()=>kmPickComposer(c.id,c.name);
+        list.appendChild(item);
+      }
+    });
+
+    kmLoaded=true;
+    kmBuildMap();
+    await kmLoadRoutes();
+    kmShowRouteSelector('all');
+    kmInitPilgrimCities();
+  }catch(e){
+    document.getElementById('km-loading').innerHTML='<div style="padding:24px;text-align:center;font-family:\'EB Garamond\',serif;font-style:italic;color:var(--txl);">Could not load map data.<br><small>'+( e.message||'')+'</small></div>';
+  }
+}
+
+function kmBuildMap(){
+  document.getElementById('km-loading').style.display='none';
+  const leafletEl=document.getElementById('km-leaflet');
+  leafletEl.style.display='block';
+  leafletEl.style.filter='sepia(20%) saturate(85%) brightness(105%)';
+  if(kmMap){try{kmMap.remove();}catch(e){}kmMap=null;kmMarkers=[];}
+  const wrap=document.getElementById('km-map-wrap');
+  const W=Math.max(wrap.clientWidth||0,window.innerWidth-290);
+  const H=Math.max(wrap.clientHeight||0,window.innerHeight-56);
+  leafletEl.style.width=W+'px';leafletEl.style.height=H+'px';
+  kmMap=L.map('km-leaflet',{center:[13.5,80.0],zoom:6,zoomControl:false,preferCanvas:true});
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:18}).addTo(kmMap);
+  kmMap.invalidateSize(true);
+  kmMap.on('click',()=>kmClosePopup());
+  setTimeout(()=>kmApplyFilter(),500);
+}
+
+// ── FILTER ──
+function kmGetFilteredTemples(){
+  let temples=kmData.temples;
+  if(kmCurrentFilter!=='all'){
+    const compIds=new Set(kmData.compositions.filter(c=>c.composer_id===kmCurrentFilter).map(c=>c.id));
+    const templeIds=new Set(kmData.junctions.filter(j=>compIds.has(j.composition_id)).map(j=>j.kshetra_id));
+    temples=temples.filter(t=>templeIds.has(t.id));
+  }
+  if(kmTraditionFilter==='shaivite') temples=temples.filter(t=>t.tradition==='Shaivite');
+  if(kmTraditionFilter==='vaishnavite') temples=temples.filter(t=>t.tradition==='Vaishnavite');
+  if(kmTraditionFilter==='pancha') temples=temples.filter(t=>!!t.pancha_bhuta_stala);
+  if(kmTraditionFilter==='divya') temples=temples.filter(t=>!!t.divya_desam_number);
+  return temples;
+}
+
+function kmGetTempleKritis(templeId){
+  const compIds=new Set(kmData.junctions.filter(j=>j.kshetra_id===templeId).map(j=>j.composition_id));
+  let kritis=kmData.compositions.filter(c=>compIds.has(c.id));
+  if(kmCurrentFilter!=='all') kritis=kritis.filter(c=>c.composer_id===kmCurrentFilter);
+  return kritis;
+}
+
+function kmUpdateStats(temples){
+  const total=temples.reduce((n,t)=>n+kmGetTempleKritis(t.id).length,0);
+  document.getElementById('km-stat-temples').textContent=temples.length;
+  document.getElementById('km-stat-kritis').textContent=total;
+}
+
+function kmTempleIcon(temple,size){
+  const isPancha=!!temple.pancha_bhuta_stala;
+  const isDivya=!!temple.divya_desam_number;
+  const isShaiva=temple.tradition==='Shaivite';
+  const bodyColor=isShaiva?'#B5651D':'#1A7A6E';
+  const roofColor=isShaiva?'#D4850A':'#0E5A52';
+  const ringColor=isPancha?'#E8A020':isDivya?'#2ABCBC':'white';
+  const ringWidth=(isPancha||isDivya)?2.5:1.5;
+  const s=size,half=s/2;
+  let svgContent;
+  if(isShaiva){
+    svgContent=`<rect x="${half-3}" y="${s*0.62}" width="6" height="${s*0.38}" fill="${bodyColor}"/><rect x="${half-4}" y="${s*0.50}" width="8" height="${s*0.14}" fill="${roofColor}"/><rect x="${half-3}" y="${s*0.38}" width="6" height="${s*0.14}" fill="${bodyColor}"/><rect x="${half-2}" y="${s*0.28}" width="4" height="${s*0.12}" fill="${roofColor}"/><polygon points="${half},${s*0.04} ${half-2},${s*0.28} ${half+2},${s*0.28}" fill="${bodyColor}"/>`;
+  }else{
+    svgContent=`<rect x="${half-3}" y="${s*0.60}" width="6" height="${s*0.40}" fill="${bodyColor}"/><rect x="${half-4}" y="${s*0.52}" width="8" height="${s*0.10}" fill="${roofColor}"/><ellipse cx="${half}" cy="${s*0.36}" rx="3.5" ry="${s*0.18}" fill="${bodyColor}"/><ellipse cx="${half}" cy="${s*0.22}" rx="2.2" ry="${s*0.12}" fill="${roofColor}"/><circle cx="${half}" cy="${s*0.10}" r="1.5" fill="${bodyColor}"/>`;
+  }
+  const html=`<div style="position:relative;width:${s}px;height:${s}px;"><svg width="${s}" height="${s}" viewBox="0 0 ${s} ${s}" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 2px 4px rgba(0,0,0,0.35));"><circle cx="${half}" cy="${half}" r="${half-1}" fill="white" fill-opacity="0.92" stroke="${ringColor}" stroke-width="${ringWidth}"/>${svgContent}</svg>${isPancha?`<div style="position:absolute;top:-4px;right:-4px;width:10px;height:10px;border-radius:50%;background:#E8A020;border:1.5px solid white;color:white;font-size:6px;display:flex;align-items:center;justify-content:center;">✦</div>`:''}${isDivya?`<div style="position:absolute;top:-4px;right:-4px;width:10px;height:10px;border-radius:2px;background:#2ABCBC;border:1.5px solid white;"></div>`:''}`;
+  return L.divIcon({html,className:'',iconSize:[s,s],iconAnchor:[half,half]});
+}
+
+function kmApplyFilter(){
+  if(!kmMap)return;
+  kmMarkers.forEach(m=>{try{m.remove();}catch(e){}});
+  kmMarkers=[];
+  const isFiltered=kmCurrentFilter!=='all';
+  const temples=kmGetFilteredTemples();
+  kmUpdateStats(temples);
+  temples.forEach(temple=>{
+    const lat=parseFloat(temple.latitude),lng=parseFloat(temple.longitude);
+    if(isNaN(lat)||isNaN(lng)||lat===0||lng===0)return;
+    const kritiCount=kmGetTempleKritis(temple.id).length;
+    const size=isFiltered?Math.max(28,Math.min(44,28+kritiCount*1.2)):Math.max(18,Math.min(28,18+kritiCount*0.5));
+    const icon=kmTempleIcon(temple,size);
+    const cleanName=kmCleanName(temple.temple_name);
+    const marker=L.marker([lat,lng],{icon,title:cleanName,zIndexOffset:kritiCount*10});
+    marker.bindTooltip(isFiltered?`${cleanName}  ·  ${kritiCount} kriti${kritiCount!==1?'s':''}`:cleanName,{permanent:false,direction:'top',className:'km-tooltip',offset:[0,-(size/2)-4]});
+    marker.on('click',e=>{L.DomEvent.stopPropagation(e);kmShowPopup(temple);});
+    marker.addTo(kmMap);
+    kmMarkers.push(marker);
+  });
+}
+
+// ── POPUP ──
+function kmShowPopup(temple,routeStop){
+  const kritis=kmGetTempleKritis(temple.id);
+  document.getElementById('km-popup-tradition').textContent=(temple.tradition||'').toUpperCase()+' TRADITION';
+  document.getElementById('km-popup-name').textContent=kmCleanName(temple.temple_name);
+  document.getElementById('km-popup-location').textContent=[temple.location_city,temple.location_state].filter(Boolean).join(', ');
+  document.getElementById('km-popup-deity').textContent=temple.deity||'';
+  const badgeEl=document.getElementById('km-popup-badges');badgeEl.innerHTML='';
+  if(temple.pancha_bhuta_stala) badgeEl.innerHTML+='<span class="km-badge pancha">★ PANCHA BHUTA STALA</span>';
+  if(temple.divya_desam_number) badgeEl.innerHTML+=`<span class="km-badge divya">◈ DIVYA DESAM #${temple.divya_desam_number}</span>`;
+  document.getElementById('km-popup-sig').textContent=temple.significance||'';
+  const kritisEl=document.getElementById('km-popup-kritis');
+  const kritisLabel=document.getElementById('km-popup-kritis-label');
+  if(!kritis.length){kritisLabel.style.display='none';kritisEl.innerHTML='';}
+  else{
+    kritisLabel.style.display='block';
+    kritisLabel.textContent=`${kritis.length} KRITI${kritis.length!==1?'S':''} COMPOSED HERE`;
+    kritisEl.innerHTML=kritis.map(k=>{
+      const meta=(typeof k.metadata==='string'?JSON.parse(k.metadata||'{}'):k.metadata)||{};
+      const comp=kmGetComposer(k.composer_id);
+      return`<div class="km-kriti-card">${meta.cycle?`<div class="km-kriti-cycle">✦ ${meta.cycle}</div>`:''}<div class="km-kriti-title">${k.title||''}</div><div class="km-kriti-composer" style="color:${comp.color}">${comp.name.toUpperCase()}</div><div class="km-kriti-meta">${k.raga?`<span class="km-kriti-tag">${k.raga}</span>`:''}${k.tala?`<span class="km-kriti-tag">· ${k.tala}</span>`:''}${k.language?`<span class="km-kriti-tag">· ${k.language}</span>`:''}</div>${meta.significance?`<div class="km-kriti-sig">${meta.significance}</div>`:''}</div>`;
+    }).join('');
+  }
+  document.getElementById('km-popup').style.display='block';
+}
+function kmClosePopup(){document.getElementById('km-popup').style.display='none';}
+
+// ── COMPOSER FILTER ──
+function kmFilterComposer(val){
+  kmCurrentFilter=val;kmClosePopup();kmClearRoute();kmApplyFilter();kmShowRouteSelector(val);
+  const sub=document.getElementById('km-sidebar-sub');
+  if(val==='all'){sub.textContent='Sacred temples & the compositions they inspired';if(kmMap)kmMap.setView([13.5,80.0],6);}
+  else{
+    const comp=kmGetComposer(val);
+    sub.innerHTML=`Showing temples of <strong style="color:${comp.color}">${comp.name}</strong>`;
+    const temples=kmGetFilteredTemples();
+    if(temples.length&&kmMap){
+      const lats=temples.map(t=>parseFloat(t.latitude)),lngs=temples.map(t=>parseFloat(t.longitude));
+      kmMap.fitBounds([[Math.min(...lats)-0.8,Math.min(...lngs)-0.8],[Math.max(...lats)+0.8,Math.max(...lngs)+0.8]],{padding:[40,40],maxZoom:9,animate:true});
+    }
+  }
+}
+
+// ── TRADITION FILTER ──
+function kmSetTraditionFilter(val){
+  kmTraditionFilter=(kmTraditionFilter===val)?'all':val;
+  ['shaivite','vaishnavite','pancha','divya'].forEach(k=>{const el=document.getElementById('lf-'+k);if(el)el.classList.toggle('km-lf-active',kmTraditionFilter===k);});
+  kmClosePopup();kmApplyFilter();
+}
+
+// ── ROUTES ──
+async function kmLoadRoutes(){
+  try{
+    const{data:routes,error:re}=await db.from('pilgrimage_routes').select('id,route_name,description,circa,sequence_number,travel_note,composer_id,kshetra_id,composition_id').order('route_name').order('sequence_number');
+    if(re)throw re;
+    const kshetraIds=[...new Set((routes||[]).map(r=>r.kshetra_id).filter(Boolean))];
+    const compositionIds=[...new Set((routes||[]).map(r=>r.composition_id).filter(Boolean))];
+    const[{data:kshetras},{data:comps}]=await Promise.all([
+      kshetraIds.length?db.from('kshetras').select('id,temple_name,latitude,longitude,location_city,location_state').in('id',kshetraIds):{data:[]},
+      compositionIds.length?db.from('compositions').select('id,title,raga').in('id',compositionIds):{data:[]}
+    ]);
+    const kshetraMap=Object.fromEntries((kshetras||[]).map(k=>[k.id,k]));
+    const compMap=Object.fromEntries((comps||[]).map(c=>[c.id,c]));
+    kmRouteData=(routes||[]).map(r=>({...r,kshetra:kshetraMap[r.kshetra_id]||null,composition:compMap[r.composition_id]||null}));
+    const routeMap={};
+    kmRouteData.forEach(stop=>{
+      if(!routeMap[stop.route_name])routeMap[stop.route_name]={name:stop.route_name,composer_id:stop.composer_id,circa:stop.circa,description:stop.description,stops:[]};
+      routeMap[stop.route_name].stops.push(stop);
+    });
+    kmRouteData._grouped=Object.values(routeMap);
+  }catch(e){console.error('Route load:',e);}
+}
+
+function kmShowRouteSelector(composerId){
+  const list=document.getElementById('km-route-list');
+  const section=document.getElementById('km-route-section');
+  if(!kmRouteData._grouped){section.style.display='none';return;}
+  const routes=composerId==='all'?kmRouteData._grouped:kmRouteData._grouped.filter(r=>r.composer_id===composerId);
+  if(!routes.length){section.style.display='none';return;}
+  list.innerHTML=`<div class="km-dropdown-item" style="color:var(--txl);" onclick="kmPickRoute('')">— Select a route —</div>`;
+  routes.forEach(r=>{
+    const p=KM_ROUTE_COLORS[r.name]||{pin:'#7A5C10'};
+    const item=document.createElement('div');
+    item.className='km-dropdown-item';item.dataset.val=r.name;
+    item.innerHTML=`<span class="km-dropdown-swatch" style="background:${p.pin}"></span>${r.name}`;
+    item.onclick=()=>kmPickRoute(r.name,r.name);
+    list.appendChild(item);
+  });
+  document.getElementById('km-route-btn').textContent='— Select a route —';
+  section.style.display='block';
+}
+
+function kmSelectRoute(routeName){
+  kmClearRoute();
+  if(!routeName)return;
+  const route=kmRouteData._grouped.find(r=>r.name===routeName);
+  if(!route)return;
+  kmCurrentRoute=route;kmPlayStep=0;
+  const panel=document.getElementById('km-route-panel');
+  document.getElementById('km-route-info').textContent=(route.description||'')+(route.circa?` (${route.circa})`:'');
+  panel.style.display='flex';
+  kmRenderStopList(route.stops,-1);
+  kmDrawRoute(route);
+  kmShowPlaybar(route);
+  setTimeout(()=>{kmPlayStep=0;kmFocusStop(0);kmUpdatePlaybar();},800);
+}
+
+function kmRenderStopList(stops,activeIdx){
+  const el=document.getElementById('km-route-stops');
+  const palette=kmCurrentRoute?(KM_ROUTE_COLORS[kmCurrentRoute.name]||{pin:'#7A5C10'}):{pin:'#7A5C10'};
+  el.innerHTML=stops.map((s,i)=>`<div class="km-stop-item ${i===activeIdx?'active':''}" onclick="kmStepToStop(${i})"><div class="km-stop-num" style="background:${i===activeIdx?'var(--tl)':palette.pin}">${s.sequence_number}</div><div class="km-stop-body"><div class="km-stop-name">${kmCleanName(s.kshetra?.temple_name||'—')}</div>${s.composition?.title?`<div class="km-stop-kriti" style="color:${palette.pin}">✦ ${s.composition.title}${s.composition.raga?' · '+s.composition.raga:''}</div>`:''}</div></div>`).join('');
+  if(activeIdx>=0)setTimeout(()=>{const active=el.querySelector('.active');if(active)active.scrollIntoView({behavior:'smooth',block:'nearest'});},100);
+}
+
+function kmStepToStop(idx){kmPlayStep=idx;kmFocusStop(idx);kmUpdatePlaybar();}
+
+function kmDrawRoute(route){
+  if(!kmMap)return;
+  const palette=KM_ROUTE_COLORS[route.name]||{line:'#E8A020',pin:'#E8A020'};
+  const stops=route.stops.filter(s=>s.kshetra?.latitude&&s.kshetra?.longitude);
+  if(!stops.length)return;
+  const latlngs=stops.map(s=>[parseFloat(s.kshetra.latitude),parseFloat(s.kshetra.longitude)]);
+  kmRouteLines.push(L.polyline(latlngs,{color:'white',weight:6,opacity:0.7}).addTo(kmMap));
+  kmRouteLines.push(L.polyline(latlngs,{color:palette.line,weight:3.5,opacity:1,dashArray:'10 6'}).addTo(kmMap));
+  stops.forEach((stop,i)=>{
+    const icon=L.divIcon({html:`<div style="width:28px;height:28px;border-radius:50%;background:${palette.pin};border:3px solid white;color:white;font-family:'Cinzel',serif;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,0.4);">${stop.sequence_number}</div>`,className:'',iconSize:[28,28],iconAnchor:[14,14]});
+    const m=L.marker([parseFloat(stop.kshetra.latitude),parseFloat(stop.kshetra.longitude)],{icon,zIndexOffset:1000});
+    m.bindTooltip(`<strong>${stop.sequence_number}. ${kmCleanName(stop.kshetra.temple_name)}</strong>${stop.composition?.title?'<br><em style="color:'+palette.pin+'">✦ '+stop.composition.title+'</em>':''}`,{direction:'top',className:'km-tooltip',offset:[0,-16]});
+    m.on('click',e=>{L.DomEvent.stopPropagation(e);kmFocusStop(i);});
+    m.addTo(kmMap);
+    kmRouteMarkers.push(m);
+    const el=m.getElement?.();
+    if(el){el.style.opacity='0';el.style.transform='scale(0.3)';el.style.transition='opacity 0.4s ease,transform 0.4s ease';}
+    setTimeout(()=>{const el2=m.getElement?.();if(el2){el2.style.opacity='1';el2.style.transform='scale(1)';}},200+i*150);
+  });
+  kmMap.fitBounds(L.latLngBounds(latlngs),{padding:[70,70],maxZoom:9,animate:true});
+}
+
+function kmShowPlaybar(route){
+  const bar=document.getElementById('km-playbar');
+  bar.style.display='flex';
+  document.getElementById('km-playbar-route').textContent=route.name.toUpperCase();
+  const palette=KM_ROUTE_COLORS[route.name]||{pin:'#7A5C10'};
+  document.querySelector('.km-playbar-play').style.background=palette.pin;
+  document.getElementById('km-pb-fill').style.background=`linear-gradient(90deg,${palette.pin},${palette.pin}aa)`;
+  kmUpdatePlaybar();
+}
+
+function kmUpdatePlaybar(){
+  if(!kmCurrentRoute)return;
+  const stops=kmCurrentRoute.stops.filter(s=>s.kshetra?.latitude);
+  const total=stops.length,cur=kmPlayStep;
+  const pct=total>1?(cur/(total-1))*100:0;
+  document.getElementById('km-pb-fill').style.width=pct+'%';
+  document.getElementById('km-pb-step').textContent=`Stop ${cur+1} of ${total}`;
+  document.getElementById('km-pb-prev').disabled=cur<=0;
+  document.getElementById('km-pb-next').disabled=cur>=total-1;
+}
+
+function kmStepRoute(dir){
+  if(!kmCurrentRoute)return;
+  const stops=kmCurrentRoute.stops.filter(s=>s.kshetra?.latitude);
+  const newStep=kmPlayStep+dir;
+  if(newStep<0||newStep>=stops.length)return;
+  kmPlayStep=newStep;kmFocusStop(kmPlayStep);kmUpdatePlaybar();
+}
+
+function kmPlayRoute(){
+  if(!kmCurrentRoute)return;
+  const stops=kmCurrentRoute.stops.filter(s=>s.kshetra?.latitude);
+  if(!stops.length)return;
+  const playIcon=document.getElementById('km-pb-play-icon');
+  if(kmPlayInterval){clearInterval(kmPlayInterval);kmPlayInterval=null;playIcon.innerHTML='<path d="M5 3.5l10 5.5-10 5.5z"/>';return;}
+  playIcon.innerHTML='<rect x="4" y="3" width="4" height="12" rx="1"/><rect x="10" y="3" width="4" height="12" rx="1"/>';
+  if(kmPlayStep>=stops.length-1)kmPlayStep=0;
+  const advance=()=>{
+    if(kmPlayStep>=stops.length){clearInterval(kmPlayInterval);kmPlayInterval=null;playIcon.innerHTML='<path d="M5 3.5l10 5.5-10 5.5z"/>';return;}
+    kmFocusStop(kmPlayStep);kmPlayStep++;kmUpdatePlaybar();
+  };
+  advance();kmPlayInterval=setInterval(advance,3200);
+}
+
+function kmFocusStop(idx){
+  if(!kmCurrentRoute)return;
+  const stops=kmCurrentRoute.stops.filter(s=>s.kshetra?.latitude);
+  const stop=stops[idx];if(!stop)return;
+  kmRenderStopList(stops,idx);
+  kmMap.flyTo([parseFloat(stop.kshetra.latitude),parseFloat(stop.kshetra.longitude)],Math.max(kmMap.getZoom(),8),{animate:true,duration:0.9});
+  const temple=kmData.temples.find(t=>t.id===stop.kshetra.id)||{...stop.kshetra,significance:stop.travel_note||''};
+  kmShowPopup(temple,stop);
+}
+
+function kmClearRoute(){
+  if(kmPlayInterval){clearInterval(kmPlayInterval);kmPlayInterval=null;}
+  kmRouteLines.forEach(l=>{try{l.remove();}catch(e){}});
+  kmRouteMarkers.forEach(m=>{try{m.remove();}catch(e){}});
+  kmRouteLines=[];kmRouteMarkers=[];kmCurrentRoute=null;kmPlayStep=0;
+  document.getElementById('km-route-panel').style.display='none';
+  document.getElementById('km-playbar').style.display='none';
+  document.getElementById('km-route-btn').textContent='— Select a route —';
+  document.getElementById('km-pb-play-icon').innerHTML='<path d="M5 3.5l10 5.5-10 5.5z"/>';
+  kmClosePopup();
+}
+
+// ── PILGRIM PLANNER ──
+function kmInitPilgrimCities(){
+  const list=document.getElementById('km-city-list');
+  KM_PILGRIM_CITIES.forEach(city=>{
+    const div=document.createElement('div');div.className='km-dropdown-item';div.textContent=city.name;
+    div.onclick=()=>{
+      document.getElementById('km-city-btn').textContent=city.name;
+      const dd=document.getElementById('km-city-dd');
+      dd.querySelector('.km-dropdown-btn').classList.remove('open');
+      dd.querySelector('.km-dropdown-list').classList.remove('open');kmOpenDD=null;
+      kmBuildPilgrimage(city);
+    };
+    list.appendChild(div);
+  });
+}
+
+function kmPilgrimScore(temple){
+  let score=0;
+  const tags=temple.designation_tags||[];
+  if(tags.includes('pancha_bhuta'))score+=30;
+  if(tags.includes('divya_desam'))score+=20;
+  const jCount=(kmData.junctions||[]).filter(j=>j.kshetra_id===temple.id).length;
+  if(jCount>=10)score+=25;else if(jCount>=5)score+=18;else if(jCount>=2)score+=10;else if(jCount>=1)score+=8;
+  const city=(temple.location_city||'').toLowerCase();
+  ['thanjavur','chidambaram','kumbakonam','madurai','tiruchirapalli','tiruvarur'].forEach(c=>{if(city.includes(c))score+=15;});
+  return score;
+}
+
+function kmBuildPilgrimage(city){
+  const scored=kmData.temples.filter(t=>t.latitude&&t.longitude).map(t=>({t,score:kmPilgrimScore(t)})).sort((a,b)=>b.score-a.score).slice(0,80).map(x=>x.t);
+  const ordered=[];const remaining=[...scored];
+  let curLat=city.lat,curLng=city.lng;
+  while(remaining.length){
+    let best=0,bestDist=Infinity;
+    remaining.forEach((t,i)=>{const d=Math.hypot(t.latitude-curLat,t.longitude-curLng);if(d<bestDist){bestDist=d;best=i;}});
+    const chosen=remaining.splice(best,1)[0];ordered.push(chosen);curLat=chosen.latitude;curLng=chosen.longitude;
+  }
+  const stops=ordered.map((t,i)=>{
+    const juncs=(kmData.junctions||[]).filter(j=>j.kshetra_id===t.id);
+    const comp=juncs.length?(kmData.compositions||[]).find(c=>c.id===juncs[0].composition_id):null;
+    return{sequence_number:i+1,travel_note:'',kshetra:{id:t.id,temple_name:t.temple_name,latitude:t.latitude,longitude:t.longitude,location_city:t.location_city,location_state:t.location_state},composition:comp?{id:comp.id,title:comp.title,raga:comp.raga}:null};
+  });
+  const routeObj={name:'Carnatic Pilgrimage',description:`A personalised Carnatic pilgrimage starting from ${city.name}, visiting ${stops.length} sacred temples.`,stops};
+  kmClearRoute();kmCurrentRoute=routeObj;kmPlayStep=0;
+  kmDrawRoute(routeObj);kmShowPlaybar(routeObj);kmFocusStop(0);kmRenderStopList(routeObj.stops,0);
+}
+
+// ── ZOOM / RESET ──
+function kmZoomIn(){if(kmMap)kmMap.zoomIn();}
+function kmZoomOut(){if(kmMap)kmMap.zoomOut();}
+function kmResetView(){
+  kmCurrentFilter='all';kmTraditionFilter='all';
+  document.getElementById('km-composer-btn').textContent='All Composers';document.getElementById('km-composer-btn').dataset.val='all';
+  document.querySelectorAll('#km-composer-list .km-dropdown-item').forEach((el,i)=>el.classList.toggle('selected',i===0));
+  ['shaivite','vaishnavite','pancha','divya'].forEach(k=>{const el=document.getElementById('lf-'+k);if(el)el.classList.remove('km-lf-active');});
+  document.getElementById('km-sidebar-sub').textContent='Sacred temples & the compositions they inspired';
+  document.getElementById('km-city-btn').textContent='— Select a city —';
+  kmClearRoute();kmShowRouteSelector('all');kmApplyFilter();
+  if(kmMap)kmMap.setView([13.5,80.0],6);
+}
+
+// ── START ──
+kmInit();
+</script>
+</body>
+</html>
