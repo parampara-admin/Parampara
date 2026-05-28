@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Living Bridges · Parampara</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --iv:#F2EBD9;--ivm:#EAE0C8;
+  --g:#7A5C10;--gm:#9A7420;--gl:#C4A044;--gb:#D4AD48;
+  --br:#2E1F04;--brm:#4A3010;
+  --tx:#2C1E06;--txm:#5A4020;--txl:#8A7040;
+  --tl:#2A6060;--tll:#3A8080;
+  --bo:rgba(122,92,16,0.15);--bom:rgba(122,92,16,0.30);--bos:rgba(122,92,16,0.55);
+  --sh:rgba(50,32,8,0.08);--shm:rgba(50,32,8,0.16);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;}
+body{font-family:'EB Garamond',serif;background:var(--iv);color:var(--tx);display:flex;flex-direction:column;}
+
+/* NAV */
+.nav{
+  flex-shrink:0;height:56px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 32px;background:rgba(242,235,217,0.97);border-bottom:1px solid var(--bo);
+  backdrop-filter:blur(8px);z-index:20;
+}
+.nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-logo{font-family:'Cinzel',serif;font-size:15px;letter-spacing:0.2em;color:var(--g);}
+.nav-div{width:1px;height:18px;background:var(--bom);}
+.nav-sub{font-family:'EB Garamond',serif;font-style:italic;font-size:14px;color:var(--txl);}
+.nav-back{
+  display:flex;align-items:center;gap:8px;padding:8px 18px;
+  border:1px solid var(--bom);border-radius:2px;background:none;
+  font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.18em;
+  color:var(--g);cursor:pointer;transition:all 0.2s;text-decoration:none;
+}
+.nav-back:hover{background:rgba(196,160,68,0.1);border-color:var(--gl);}
+
+/* HERO */
+.lb-hero{
+  background:linear-gradient(135deg,rgba(122,92,16,0.07),rgba(196,160,68,0.04));
+  border-bottom:1px solid var(--bo);padding:24px 32px 20px;flex-shrink:0;
+}
+.lb-hero-title{
+  font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:400;
+  color:var(--br);margin-bottom:6px;
+}
+.lb-hero-title span{color:var(--g);}
+.lb-criteria{
+  font-family:'EB Garamond',serif;font-style:italic;font-size:14px;color:var(--txl);
+  border-left:3px solid var(--gl);padding-left:12px;margin-top:8px;line-height:1.5;
+}
+
+/* FILTERS */
+.lb-filters{
+  display:flex;gap:10px;flex-wrap:wrap;padding:14px 32px;
+  border-bottom:1px solid var(--bo);flex-shrink:0;background:rgba(255,252,245,0.8);
+}
+.lb-filter{
+  padding:6px 16px;border:1px solid var(--bom);border-radius:20px;
+  font-family:'Cinzel',serif;font-size:8px;letter-spacing:0.16em;
+  color:var(--g);background:none;cursor:pointer;transition:all 0.2s;
+}
+.lb-filter:hover,.lb-filter.active{background:var(--g);color:var(--iv);border-color:var(--g);}
+
+/* GRID */
+.lb-grid{
+  padding:24px 32px;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;
+  overflow-y:auto;-webkit-overflow-scrolling:touch;flex:1;min-height:0;
+}
+
+/* CARDS */
+.lb-card{
+  background:white;border:1px solid var(--bo);border-radius:4px;
+  padding:20px;cursor:pointer;transition:all 0.25s;position:relative;
+}
+.lb-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--gl),var(--gb));
+  transform:scaleX(0);transform-origin:left;transition:transform 0.3s;
+}
+.lb-card:hover{transform:translateY(-3px);border-color:var(--gl);box-shadow:0 8px 28px rgba(122,92,16,0.1);}
+.lb-card:hover::before{transform:scaleX(1);}
+.lb-badge{
+  display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:20px;
+  font-family:'Cinzel',serif;font-size:7px;letter-spacing:0.14em;
+  background:rgba(196,160,68,0.12);border:1px solid rgba(196,160,68,0.4);
+  color:#7A5C10;margin-bottom:10px;
+}
+.lb-name{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:500;color:#2E1F04;margin-bottom:4px;}
+.lb-role{font-family:'EB Garamond',serif;font-style:italic;font-size:13px;color:#6B5030;margin-bottom:8px;}
+.lb-gurus-title{font-family:'Cinzel',serif;font-size:7px;letter-spacing:0.16em;color:#8A7040;}
+.lb-guru-tag{
+  display:inline-flex;align-items:center;gap:4px;padding:3px 8px;margin:2px;
+  border-radius:2px;font-family:'EB Garamond',serif;font-size:12px;color:#4A3010;
+  background:rgba(122,92,16,0.06);border:1px solid rgba(122,92,16,0.12);
+}
+.lb-guru-tag.historical{background:rgba(196,160,68,0.1);border-color:rgba(196,160,68,0.3);color:#7A5C10;}
+.lb-stat-row{display:flex;gap:16px;margin-top:14px;padding-top:12px;border-top:1px solid rgba(122,92,16,0.15);}
+.lb-stat{display:flex;flex-direction:column;}
+.lb-stat-num{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;color:#7A5C10;line-height:1;}
+.lb-stat-lbl{font-family:'Cinzel',serif;font-size:7px;letter-spacing:0.12em;color:#8A7040;}
+.lb-arrow{position:absolute;right:16px;top:50%;transform:translateY(-50%);color:#C4A044;font-size:18px;}
+.lb-empty{
+  grid-column:1/-1;padding:40px;text-align:center;
+  font-family:'EB Garamond',serif;font-style:italic;color:#8A7040;
+}
+
+/* LOADING SPINNER */
+.lsc{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;}
+@keyframes sp{to{transform:rotate(360deg)}}
+.lsp{font-size:26px;color:var(--gl);animation:sp 3s linear infinite;}
+.ltx{font-family:'EB Garamond',serif;font-style:italic;font-size:15px;color:var(--txl);}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="index.html" class="nav-brand">
+    <span class="nav-logo">PARAMPARA</span>
+    <span class="nav-div"></span>
+    <span class="nav-sub">Living Bridges</span>
+  </a>
+  <a href="index.html" class="nav-back">← Back</a>
+</nav>
+
+<!-- HERO -->
+<div class="lb-hero">
+  <div class="lb-hero-title">✦ <span>Living Bridges</span></div>
+  <div class="lb-criteria">Artists who received direct musical training from two or more historical masters — carrying the living memory of past traditions into the present generation.</div>
+</div>
+
+<!-- FILTERS -->
+<div class="lb-filters">
+  <button class="lb-filter active" onclick="filterBridges('all',this)">ALL</button>
+  <button class="lb-filter" onclick="filterBridges('vocal',this)">VOCAL</button>
+  <button class="lb-filter" onclick="filterBridges('violin',this)">VIOLIN</button>
+  <button class="lb-filter" onclick="filterBridges('mridangam',this)">MRIDANGAM</button>
+  <button class="lb-filter" onclick="filterBridges('india',this)">INDIA</button>
+  <button class="lb-filter" onclick="filterBridges('singapore',this)">SINGAPORE</button>
+</div>
+
+<!-- GRID -->
+<div class="lb-grid" id="lb-grid">
+  <div class="lsc"><div class="lsp">✦</div><div class="ltx">Loading…</div></div>
+</div>
+
+<script>
+const SU = 'https://enxhnemcgbicfxzrfveh.supabase.co';
+const SK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVueGhuZW1jZ2JpY2Z4enJmdmVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczODQ0ODMsImV4cCI6MjA5Mjk2MDQ4M30.zTBJ5DAs4v965Dmy4wCfcSWa5eIVFGnf8XvXEFuBDpE';
+const { createClient } = supabase;
+const db = createClient(SU, SK);
+
+let allBridges = [];
+
+async function loadLivingBridges() {
+  const grid = document.getElementById('lb-grid');
+  const LIVING_BRIDGE_ID = 'b5967476-63db-49a3-b435-7a77eb9f5a53';
+  try {
+    const { data: pbs } = await db.from('profile_badges').select('profile_id').eq('badge_id', LIVING_BRIDGE_ID);
+    if (!pbs || !pbs.length) { grid.innerHTML = '<div class="lb-empty">No Living Bridge artists assigned.</div>'; return; }
+
+    const ids = pbs.map(b => b.profile_id).filter(Boolean);
+
+    const { data: profiles, error: pe } = await db.from('profiles')
+      .select('id,full_name,primary_role,current_country,instrument_aliases,is_deceased')
+      .in('id', ids).order('full_name');
+    if (pe || !profiles || !profiles.length) {
+      grid.innerHTML = '<div class="lb-empty">Could not load profiles.</div>'; return;
+    }
+
+    const { data: links } = await db.from('guru_shishya_lineage')
+      .select('shishya_id,guru_id,discipline')
+      .in('shishya_id', ids).neq('discipline','Heritage');
+
+    const guruIds = [...new Set((links || []).map(l => l.guru_id).filter(Boolean))];
+    let gm = {};
+    if (guruIds.length) {
+      const { data: gps } = await db.from('profiles').select('id,full_name,is_deceased').in('id', guruIds);
+      (gps || []).forEach(g => { if (g) gm[g.id] = g; });
+    }
+
+    allBridges = profiles.map(p => {
+      const gl = (links || []).filter(l => l.shishya_id === p.id)
+        .map(l => ({ ...(gm[l.guru_id] || {}), discipline: l.discipline }))
+        .filter(g => g && g.full_name);
+      return {
+        ...p,
+        myGurus: gl,
+        historicalGurus: gl.filter(g => g.is_deceased),
+        livingGurus: gl.filter(g => !g.is_deceased)
+      };
+    }).sort((a, b) =>
+      b.historicalGurus.length - a.historicalGurus.length ||
+      (a.full_name || '').localeCompare(b.full_name || '')
+    );
+
+    renderBridges(allBridges);
+  } catch(e) {
+    console.error('LB:', e);
+    document.getElementById('lb-grid').innerHTML = '<div class="lb-empty">Error: ' + (e.message || e) + '</div>';
+  }
+}
+
+function filterBridges(type, btn) {
+  document.querySelectorAll('.lb-filter').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  let f = allBridges;
+  if (type === 'vocal')      f = f.filter(p => (p.primary_role || '').toLowerCase().includes('vocal'));
+  else if (type === 'violin')     f = f.filter(p => (p.instrument_aliases || []).some(i => (i || '').toLowerCase().includes('violin')));
+  else if (type === 'mridangam')  f = f.filter(p => (p.instrument_aliases || []).some(i => (i || '').toLowerCase().includes('mridangam')));
+  else if (type === 'india')      f = f.filter(p => p.current_country === 'India');
+  else if (type === 'singapore')  f = f.filter(p => p.current_country === 'Singapore');
+  renderBridges(f);
+}
+
+function renderBridges(bridges) {
+  const grid = document.getElementById('lb-grid');
+  if (!bridges.length) { grid.innerHTML = '<div class="lb-empty">No artists match.</div>'; return; }
+  let out = '';
+  for (let i = 0; i < bridges.length; i++) {
+    const p = bridges[i];
+    let ins = '';
+    if (p.instrument_aliases) {
+      let a = p.instrument_aliases;
+      if (typeof a === 'string') { try { a = JSON.parse(a); } catch {} }
+      if (Array.isArray(a)) ins = a.filter(x => x && x !== 'Vocal').slice(0, 2).join(', ');
+    }
+    let ht = '';
+    (p.historicalGurus || []).forEach(g => { ht += '<span class="lb-guru-tag historical">✦ ' + g.full_name + '</span>'; });
+    let lt = '';
+    (p.livingGurus || []).forEach(g => { lt += '<span class="lb-guru-tag">' + g.full_name + '</span>'; });
+
+    out += '<div class="lb-card">' +
+      '<div class="lb-badge">✦ LIVING BRIDGE</div>' +
+      '<div class="lb-name">' + (p.full_name || '') + '</div>' +
+      '<div class="lb-role">' + (p.primary_role || '') + (ins ? ' · ' + ins : '') + (p.current_country ? ' · ' + p.current_country : '') + '</div>' +
+      '<div class="lb-gurus-title" style="margin:8px 0 3px;">HISTORICAL MASTERS</div><div>' + ht + '</div>' +
+      (lt ? '<div class="lb-gurus-title" style="margin:8px 0 3px;">LIVING GURUS</div><div>' + lt + '</div>' : '') +
+      '<div class="lb-stat-row">' +
+        '<div class="lb-stat"><div class="lb-stat-num">' + ((p.historicalGurus || []).length) + '</div><div class="lb-stat-lbl">HISTORICAL</div></div>' +
+        '<div class="lb-stat"><div class="lb-stat-num">' + ((p.livingGurus || []).length) + '</div><div class="lb-stat-lbl">LIVING</div></div>' +
+        '<div class="lb-stat"><div class="lb-stat-num">' + ((p.myGurus || []).length) + '</div><div class="lb-stat-lbl">TOTAL</div></div>' +
+      '</div>' +
+      '<div class="lb-arrow">›</div>' +
+    '</div>';
+  }
+  grid.innerHTML = out;
+}
+
+loadLivingBridges();
+</script>
+</body>
+</html>
