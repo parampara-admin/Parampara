@@ -272,18 +272,18 @@
     }
 
     async function afterAuth(user) {
-      if (!user) return;
-      const { data: profile } = await sb
-        .from('profiles')
-        .select('covenant_accepted')
-        .eq('id', user.id)
-        .single();
-      if (profile?.covenant_accepted) {
-        window.location.href = 'home.html';   // returning user → app
-      } else {
-        window.location.href = 'covenant.html'; // new user → covenant
-      }
-    }
+  if (!user) return;
+  const { data: profile } = await sb
+    .from('profiles')
+    .select('covenant_accepted')
+    .eq('auth_id', user.id)
+    .single();
+  if (profile?.covenant_accepted) {
+    window.location.href = 'home.html';
+  } else {
+    window.location.href = 'covenant.html';
+  }
+}
 
     async function signInWithGoogle() {
       clearError();
