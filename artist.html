@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Artist · Parampara</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<style>
+:root{
+  --iv:#F2EBD9;--ivm:#EAE0C8;
+  --g:#7A5C10;--gm:#9A7420;--gl:#C4A044;--gb:#D4AD48;
+  --br:#2E1F04;--brm:#4A3010;
+  --tx:#2C1E06;--txm:#5A4020;--txl:#8A7040;
+  --tl:#2A6060;--tll:#3A8080;
+  --bo:rgba(122,92,16,0.15);--bom:rgba(122,92,16,0.30);
+  --sh:rgba(50,32,8,0.08);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;}
+body{font-family:'EB Garamond',serif;background:var(--iv);color:var(--tx);display:flex;flex-direction:column;}
+
+/* NAV */
+.nav{flex-shrink:0;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 32px;background:rgba(242,235,217,0.97);border-bottom:1px solid var(--bo);backdrop-filter:blur(8px);z-index:20;}
+.nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-logo{font-family:'Cinzel',serif;font-size:15px;letter-spacing:0.2em;color:var(--g);}
+.nav-div{width:1px;height:18px;background:var(--bom);}
+.nav-back{display:flex;align-items:center;gap:8px;padding:8px 18px;border:1px solid var(--bom);border-radius:2px;background:none;font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.18em;color:var(--g);cursor:pointer;transition:all 0.2s;text-decoration:none;}
+.nav-back:hover{background:rgba(196,160,68,0.1);border-color:var(--gl);}
+
+/* ARTIST HEADER */
+.artist-header{flex-shrink:0;padding:20px 32px 16px;border-bottom:1px solid var(--bo);background:linear-gradient(135deg,rgba(122,92,16,0.05),rgba(196,160,68,0.03));}
+.artist-name{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:500;color:var(--br);margin-bottom:4px;}
+.artist-sub{font-family:'EB Garamond',serif;font-style:italic;font-size:14px;color:var(--txl);}
+
+/* CONTROLS */
+.controls{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:10px 32px;border-bottom:1px solid var(--bo);background:rgba(255,252,245,0.9);}
+.legend{display:flex;align-items:center;gap:20px;}
+.legend-item{display:flex;align-items:center;gap:6px;font-family:'Cinzel',serif;font-size:7px;letter-spacing:0.14em;color:var(--txl);}
+.legend-line{width:20px;height:2px;border-radius:1px;}
+.legend-dot{width:10px;height:10px;border-radius:50%;}
+.zoom-btns{display:flex;gap:6px;}
+.zoom-btn{padding:6px 14px;border:1px solid var(--bom);border-radius:2px;background:white;font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.12em;color:var(--g);cursor:pointer;transition:all 0.15s;}
+.zoom-btn:hover{background:rgba(196,160,68,0.1);border-color:var(--g);}
+
+/* SVG WRAP */
+.svg-wrap{flex:1;position:relative;overflow:hidden;min-height:0;}
+#lin-svg{width:100%;height:100%;}
+
+/* LOADING */
+.loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:var(--iv);}
+@keyframes sp{to{transform:rotate(360deg)}}
+.lsp{font-size:26px;color:var(--gl);animation:sp 3s linear infinite;}
+.ltx{font-family:'EB Garamond',serif;font-style:italic;font-size:15px;color:var(--txl);}
+
+/* TOOLTIP */
+#tt{position:fixed;background:var(--iv);border:1px solid var(--bom);border-radius:3px;padding:8px 12px;pointer-events:none;z-index:100;opacity:0;transition:opacity 0.15s;box-shadow:0 4px 16px var(--sh);max-width:220px;}
+#tt.show{opacity:1;}
+#ttnm{font-family:'EB Garamond',serif;font-size:15px;color:var(--br);display:block;margin-bottom:2px;}
+#ttmt{font-family:'EB Garamond',serif;font-style:italic;font-size:12px;color:var(--txl);display:block;}
+
+/* LINEAGE KEY */
+.lin-key{position:absolute;bottom:24px;left:24px;background:rgba(242,235,217,0.95);border:1px solid var(--bo);border-radius:3px;padding:12px 14px;font-family:'Cinzel',serif;font-size:7px;letter-spacing:0.14em;color:var(--txl);}
+.lin-key-title{margin-bottom:8px;color:var(--g);}
+.lin-key-row{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
+.lin-key-row:last-child{margin-bottom:0;}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="lineage.html" class="nav-brand">
+    <img src="ParamparaLogo3D.png" style="width:32px;height:32px;object-fit:contain;">
+    <span class="nav-logo">PARAMPARA</span>
+    <span class="nav-div"></span>
+    <span class="nav-sub" id="nav-sub">Artist</span>
+  </a>
+  <a href="lineage.html" class="nav-back">← Lineage</a>
+</nav>
+
+<div class="artist-header">
+  <div class="artist-name" id="artist-name">Loading…</div>
+  <div class="artist-sub" id="artist-sub"></div>
+</div>
+
+<div class="controls">
+  <div class="legend">
+    <div class="legend-item"><div class="legend-line" style="background:var(--gl);"></div>VERIFIED</div>
+    <div class="legend-item"><div class="legend-line" style="background:var(--bom);border-top:1px dashed var(--bom);height:0;"></div>PENDING</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--g);"></div>SELECTED</div>
+    <div class="legend-item"><div class="legend-dot" style="border:1.5px solid var(--gm);background:var(--ivm);"></div>GURU</div>
+    <div class="legend-item"><div class="legend-dot" style="border:1.5px solid var(--tl);background:rgba(42,96,96,0.07);"></div>SHISHYA</div>
+    <div class="legend-item"><div class="legend-dot" style="border:1.5px dashed var(--gm);background:var(--ivm);"></div>HISTORICAL</div>
+  </div>
+  <div class="zoom-btns">
+    <button class="zoom-btn" onclick="zoomIn()">+</button>
+    <button class="zoom-btn" onclick="zoomOut()">−</button>
+    <button class="zoom-btn" onclick="resetZoom()">FIT</button>
+  </div>
+</div>
+
+<div class="svg-wrap">
+  <div class="loading" id="loading">
+    <div class="lsp">✦</div>
+    <div class="ltx" id="loading-text">Loading lineage…</div>
+  </div>
+  <svg id="lin-svg" style="display:none;"></svg>
+
+  <div class="lin-key">
+    <div class="lin-key-title">LINEAGE KEY</div>
+    <div class="lin-key-row"><svg width="20" height="8"><line x1="0" y1="4" x2="20" y2="4" stroke="var(--gl)" stroke-width="1.5"/></svg>Verified</div>
+    <div class="lin-key-row"><svg width="20" height="8"><line x1="0" y1="4" x2="20" y2="4" stroke="var(--bom)" stroke-width="1" stroke-dasharray="4 3"/></svg>Pending</div>
+    <div class="lin-key-row"><svg width="10" height="10"><circle cx="5" cy="5" r="4" fill="var(--g)"/></svg>Selected</div>
+    <div class="lin-key-row"><svg width="10" height="10"><circle cx="5" cy="5" r="4" fill="var(--ivm)" stroke="var(--gm)" stroke-width="1.5"/></svg>Guru</div>
+    <div class="lin-key-row"><svg width="10" height="10"><circle cx="5" cy="5" r="4" fill="rgba(42,96,96,0.07)" stroke="var(--tl)" stroke-width="1.5"/></svg>Shishya</div>
+    <div class="lin-key-row"><svg width="10" height="10"><circle cx="5" cy="5" r="4" fill="var(--ivm)" stroke="var(--gm)" stroke-width="1.5" stroke-dasharray="3 2"/></svg>Historical</div>
+  </div>
+</div>
+
+<div id="tt"><span id="ttnm"></span><span id="ttmt"></span></div>
+
+<script>
+const SU = 'https://enxhnemcgbicfxzrfveh.supabase.co';
+const SK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVueGhuZW1jZ2JpY2Z4enJmdmVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczODQ0ODMsImV4cCI6MjA5Mjk2MDQ4M30.zTBJ5DAs4v965Dmy4wCfcSWa5eIVFGnf8XvXEFuBDpE';
+const { createClient } = supabase;
+const db = createClient(SU, SK);
+
+let zoomBeh = null;
+
+// Get artist from URL
+const params = new URLSearchParams(window.location.search);
+const artistId = params.get('id');
+const artistName = decodeURIComponent(params.get('name') || '');
+
+document.getElementById('nav-sub').textContent = artistName || 'Artist';
+document.getElementById('artist-name').textContent = artistName || 'Loading…';
+
+async function load() {
+  try {
+    // Fetch root profile
+    let root;
+    if (artistId) {
+      const { data } = await db.from('profiles').select('id,full_name,primary_role,current_country,is_deceased').eq('id', artistId).single();
+      root = data;
+    }
+    if (!root && artistName) {
+      const { data } = await db.from('profiles').select('id,full_name,primary_role,current_country,is_deceased').eq('full_name', artistName).single();
+      root = data;
+    }
+    if (!root) throw new Error('Artist not found');
+
+    document.getElementById('artist-name').textContent = root.full_name;
+    document.getElementById('artist-sub').textContent = [root.primary_role, root.current_country, root.is_deceased ? 'Historical' : null, 'Guru-Shishya Parampara'].filter(Boolean).join(' · ');
+
+    await buildLin(root);
+  } catch(e) {
+    document.getElementById('loading-text').textContent = 'Could not load lineage.';
+    document.getElementById('loading').style.background = 'transparent';
+  }
+}
+
+async function buildLin(root) {
+  try {
+    const vis = new Set();
+
+    async function anc(id, dep) {
+      if (dep > 7 || vis.has(id)) return null;
+      vis.add(id);
+      const { data: p } = await db.from('profiles').select('id,full_name,primary_role,current_country,is_deceased').eq('id', id).single();
+      if (!p) return null;
+      const { data: lks } = await db.from('guru_shishya_lineage').select('guru_id,discipline,handshake_status').eq('shishya_id', id).limit(5);
+      const gurus = [];
+      for (const lk of (lks || [])) {
+        if (!vis.has(lk.guru_id)) {
+          const g = await anc(lk.guru_id, dep + 1);
+          if (g) gurus.push({ ...g, discipline: lk.discipline, status: lk.handshake_status });
+        }
+      }
+      return { ...p, gurus, depth: dep };
+    }
+
+    const { data: dlks } = await db.from('guru_shishya_lineage').select('shishya_id,discipline,handshake_status').eq('guru_id', root.id).limit(10);
+    const disc = [];
+    for (const lk of (dlks || [])) {
+      const { data: p2 } = await db.from('profiles').select('id,full_name,primary_role,current_country,is_deceased').eq('id', lk.shishya_id).single();
+      if (p2) disc.push({ ...p2, discipline: lk.discipline, status: lk.handshake_status });
+    }
+
+    const aTree = await anc(root.id, 0);
+    drawLin({ root, aTree, disc });
+  } catch(e) {
+    console.error(e);
+    document.getElementById('loading-text').textContent = 'Could not load lineage: ' + (e.message || e);
+  }
+}
+
+function drawLin(data) {
+  const wrap = document.querySelector('.svg-wrap');
+  const W = wrap.clientWidth, H = wrap.clientHeight;
+  const svg = d3.select('#lin-svg').attr('width', W).attr('height', H);
+  svg.selectAll('*').remove();
+  const g = svg.append('g');
+  const zoom = d3.zoom().scaleExtent([0.2, 3]).on('zoom', e => g.attr('transform', e.transform));
+  svg.call(zoom);
+  zoomBeh = zoom;
+
+  const nodes = [], links = [];
+  const rx = W / 2, ry = H * 0.62, VT = 150;
+
+  nodes.push({ id: data.root.id, name: data.root.full_name, role: data.root.primary_role, x: rx, y: ry, type: 'root', dec: false });
+
+  function plA(node, px, py, sp, lv) {
+    if (!node?.gurus?.length) return;
+    node.gurus.forEach((gu, i) => {
+      const n = node.gurus.length, off = n === 1 ? 0 : (i - (n - 1) / 2) * sp;
+      const x = px + off, y = py - VT;
+      nodes.push({ id: gu.id, name: gu.full_name, role: gu.primary_role, x, y, type: 'anc', depth: lv + 1, dec: gu.is_deceased });
+      links.push({ x1: px, y1: py, x2: x, y2: y, st: gu.status, dis: gu.discipline, dir: 'u' });
+      plA(gu, x, y, sp * 0.72, lv + 1);
+    });
+  }
+
+  plA(data.aTree, rx, ry, 260, 0);
+
+  (data.disc || []).forEach((d, i) => {
+    const n = data.disc.length, off = n === 1 ? 0 : (i - (n - 1) / 2) * 170;
+    const x = rx + off, y = ry + VT;
+    nodes.push({ id: d.id, name: d.full_name, role: d.primary_role, x, y, type: 'disc', dec: d.is_deceased });
+    links.push({ x1: rx, y1: ry, x2: x, y2: y, st: d.status, dis: d.discipline, dir: 'd' });
+  });
+
+  // Generation labels
+  const GL = ['Direct Guru', '2nd Generation', '3rd Generation', '4th Generation', '5th Generation'];
+  [...new Set(nodes.filter(n => n.type === 'anc').map(n => n.depth))].forEach(d => {
+    const dn = nodes.filter(n => n.depth === d && n.type === 'anc');
+    if (!dn.length) return;
+    const my = Math.min(...dn.map(n => n.y));
+    g.append('text').attr('x', 52).attr('y', my + 4)
+      .attr('font-family', "'Cinzel',serif").attr('font-size', '8px').attr('fill', 'var(--txl)')
+      .attr('letter-spacing', '0.14em').attr('opacity', 0)
+      .text((GL[d - 1] || `Gen ${d}`).toUpperCase())
+      .transition().delay(d * 170).duration(500).attr('opacity', 0.65);
+  });
+
+  // Links
+  links.forEach((lk, i) => {
+    const acc = lk.st === 'accepted', up = lk.dir === 'u';
+    g.append('path').attr('fill', 'none')
+      .attr('stroke', up ? 'var(--gl)' : 'var(--tll)')
+      .attr('stroke-width', 1.5).attr('stroke-opacity', 0)
+      .attr('stroke-dasharray', acc ? 'none' : '5 4')
+      .attr('d', `M${lk.x1},${lk.y1} C${lk.x1},${(lk.y1 + lk.y2) / 2} ${lk.x2},${(lk.y1 + lk.y2) / 2} ${lk.x2},${lk.y2}`)
+      .transition().delay(i * 65).duration(440).attr('stroke-opacity', acc ? 0.6 : 0.38);
+    if (lk.dis && lk.dis !== 'Heritage') {
+      const mx = (lk.x1 + lk.x2) / 2, my = (lk.y1 + lk.y2) / 2;
+      g.append('text').attr('x', mx + 6).attr('y', my)
+        .attr('font-family', "'Cinzel',serif").attr('font-size', '7px')
+        .attr('fill', up ? 'var(--gl)' : 'var(--tll)').attr('letter-spacing', '0.1em').attr('opacity', 0)
+        .text(lk.dis.toUpperCase())
+        .transition().delay(i * 65 + 360).duration(300).attr('opacity', 0.7);
+    }
+  });
+
+  const tt = document.getElementById('tt');
+
+  // Nodes
+  nodes.forEach((n, i) => {
+    const isR = n.type === 'root', isA = n.type === 'anc', r = isR ? 22 : 14;
+    const ng = g.append('g').attr('transform', `translate(${n.x},${n.y})`).style('opacity', 0).style('cursor', 'pointer');
+    if (isR) ng.append('circle').attr('r', 38).attr('fill', 'var(--g)').attr('opacity', 0.06);
+    ng.append('circle').attr('r', 0)
+      .attr('fill', isR ? 'var(--g)' : (isA ? 'var(--ivm)' : 'rgba(42,96,96,0.07)'))
+      .attr('stroke', isR ? 'var(--gb)' : (isA ? 'var(--gm)' : 'var(--tl)'))
+      .attr('stroke-width', isR ? 2.5 : 1.5)
+      .attr('stroke-dasharray', n.dec && !isR ? '3 2' : 'none')
+      .transition().delay(i * 65).duration(370).attr('r', r);
+    if (n.dec && !isR) ng.append('text').attr('y', -r - 5).attr('text-anchor', 'middle').attr('font-size', '9px').attr('fill', 'var(--txl)').text('✦');
+    const sh = n.name.length > 22 ? n.name.slice(0, 20) + '…' : n.name;
+    ng.append('text').attr('y', r + 15).attr('text-anchor', 'middle')
+      .attr('font-family', "'EB Garamond',serif").attr('font-size', isR ? '13px' : '11px')
+      .attr('font-weight', isR ? '600' : '400').attr('fill', isR ? 'var(--br)' : 'var(--txm)').text(sh);
+    if (n.role && !isR) ng.append('text').attr('y', r + 27).attr('text-anchor', 'middle')
+      .attr('font-family', "'EB Garamond',serif").attr('font-size', '9px').attr('font-style', 'italic')
+      .attr('fill', 'var(--txl)').text(n.role);
+    ng.transition().delay(i * 65).duration(440).style('opacity', 1);
+    ng.on('mouseenter', ev => {
+      document.getElementById('ttnm').textContent = n.name;
+      document.getElementById('ttmt').textContent = [n.role, n.dec ? 'Historical figure' : null].filter(Boolean).join(' · ');
+      tt.classList.add('show');
+    }).on('mousemove', ev => {
+      tt.style.left = (ev.clientX + 14) + 'px'; tt.style.top = (ev.clientY - 8) + 'px';
+    }).on('mouseleave', () => tt.classList.remove('show'))
+    .on('click', () => {
+      if (!isR && n.id) {
+        tt.classList.remove('show');
+        window.location.href = 'artist.html?id=' + encodeURIComponent(n.id) + '&name=' + encodeURIComponent(n.name);
+      }
+    });
+  });
+
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('lin-svg').style.display = 'block';
+
+  // Auto-fit
+  setTimeout(() => {
+    try {
+      const bounds = g.node().getBBox();
+      if (bounds.width === 0) return;
+      const pad = 60;
+      const scale = Math.min(0.9, Math.min((W - pad * 2) / bounds.width, (H - pad * 2) / bounds.height));
+      const tx = W / 2 - scale * (bounds.x + bounds.width / 2);
+      const ty = H / 2 - scale * (bounds.y + bounds.height / 2);
+      svg.call(zoom.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
+    } catch(e) {}
+  }, 100);
+}
+
+function zoomIn() { d3.select('#lin-svg').transition().duration(250).call(zoomBeh.scaleBy, 1.35); }
+function zoomOut() { d3.select('#lin-svg').transition().duration(250).call(zoomBeh.scaleBy, 0.74); }
+function resetZoom() {
+  const wrap = document.querySelector('.svg-wrap');
+  const W = wrap.clientWidth, H = wrap.clientHeight;
+  const g = d3.select('#lin-svg g');
+  try {
+    const bounds = g.node().getBBox();
+    if (bounds.width === 0) return;
+    const pad = 60;
+    const scale = Math.min(0.9, Math.min((W - pad * 2) / bounds.width, (H - pad * 2) / bounds.height));
+    const tx = W / 2 - scale * (bounds.x + bounds.width / 2);
+    const ty = H / 2 - scale * (bounds.y + bounds.height / 2);
+    d3.select('#lin-svg').transition().duration(400).call(zoomBeh.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
+  } catch(e) {}
+}
+
+load();
+</script>
+</body>
+</html>
