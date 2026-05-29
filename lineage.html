@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lineage · Parampara</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --iv:#F2EBD9;--ivm:#EAE0C8;
+  --g:#7A5C10;--gm:#9A7420;--gl:#C4A044;--gb:#D4AD48;
+  --br:#2E1F04;--brm:#4A3010;
+  --tx:#2C1E06;--txm:#5A4020;--txl:#8A7040;
+  --tl:#2A6060;
+  --bo:rgba(122,92,16,0.15);--bom:rgba(122,92,16,0.30);
+  --sh:rgba(50,32,8,0.08);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;}
+body{font-family:'EB Garamond',serif;background:var(--iv);color:var(--tx);display:flex;flex-direction:column;}
+
+.nav{flex-shrink:0;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 32px;background:rgba(242,235,217,0.97);border-bottom:1px solid var(--bo);backdrop-filter:blur(8px);z-index:20;}
+.nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-logo{font-family:'Cinzel',serif;font-size:15px;letter-spacing:0.2em;color:var(--g);}
+.nav-div{width:1px;height:18px;background:var(--bom);}
+.nav-sub{font-family:'EB Garamond',serif;font-style:italic;font-size:14px;color:var(--txl);}
+.nav-back{display:flex;align-items:center;gap:8px;padding:8px 18px;border:1px solid var(--bom);border-radius:2px;background:none;font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.18em;color:var(--g);cursor:pointer;transition:all 0.2s;text-decoration:none;}
+.nav-back:hover{background:rgba(196,160,68,0.1);border-color:var(--gl);}
+
+.main{flex:1;display:flex;overflow:hidden;min-height:0;}
+
+.sidebar{width:260px;flex-shrink:0;height:100%;background:rgba(242,235,217,0.98);border-right:1px solid var(--bo);display:flex;flex-direction:column;overflow-y:auto;z-index:10;box-shadow:2px 0 12px var(--sh);}
+.sidebar-header{padding:20px 18px 14px;background:linear-gradient(135deg,rgba(122,92,16,0.07),rgba(196,160,68,0.04));border-bottom:1px solid var(--bo);flex-shrink:0;}
+.sidebar-title{font-family:'Cinzel',serif;font-size:12px;letter-spacing:0.18em;color:var(--g);margin-bottom:5px;}
+.sidebar-sub{font-family:'EB Garamond',serif;font-style:italic;font-size:13px;color:var(--txl);line-height:1.4;}
+.sidebar-section{padding:14px 18px 12px;border-bottom:1px solid var(--bo);}
+.sidebar-label{font-family:'Cinzel',serif;font-size:7px;letter-spacing:0.22em;color:var(--txl);margin-bottom:8px;text-transform:uppercase;}
+
+/* Role filter badges */
+.role-filters{display:flex;flex-direction:column;gap:6px;}
+.role-filter{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border:1px solid var(--bo);border-radius:3px;cursor:pointer;transition:all 0.18s;background:white;}
+.role-filter:hover{border-color:var(--bom);background:rgba(196,160,68,0.05);}
+.role-filter.active{border-color:var(--gl);background:rgba(196,160,68,0.1);}
+.role-filter-left{display:flex;align-items:center;gap:8px;}
+.role-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.role-filter-name{font-family:'Cinzel',serif;font-size:8px;letter-spacing:0.14em;color:var(--g);}
+.role-filter-count{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--g);line-height:1;}
+
+/* Dropdown */
+.km-dropdown{position:relative;width:100%;margin-bottom:10px;}
+.km-dropdown:last-child{margin-bottom:0;}
+.km-dropdown-btn{width:100%;padding:9px 32px 9px 10px;background:white;border:1px solid var(--bom);border-radius:2px;font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--br);cursor:pointer;text-align:left;outline:none;transition:border-color 0.2s;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237A5C10'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.km-dropdown-btn:hover,.km-dropdown-btn.open{border-color:var(--g);}
+.km-dropdown-list{position:fixed;z-index:9999;background:var(--iv);border:1px solid var(--bom);border-radius:3px;box-shadow:0 8px 32px rgba(46,31,4,0.18);overflow-y:auto;max-height:260px;display:none;}
+.km-dropdown-list.open{display:block;}
+.km-dropdown-item{padding:10px 14px;cursor:pointer;font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--br);border-bottom:1px solid rgba(122,92,16,0.07);transition:background 0.12s;}
+.km-dropdown-item:last-child{border-bottom:none;}
+.km-dropdown-item:hover{background:rgba(196,160,68,0.1);}
+.km-dropdown-item.selected{background:rgba(196,160,68,0.15);color:var(--g);}
+
+/* Reset button */
+.reset-btn{width:100%;padding:8px 0;background:none;border:1px solid var(--bom);border-radius:2px;font-family:'Cinzel',serif;font-size:8px;letter-spacing:0.18em;color:var(--g);cursor:pointer;transition:all 0.18s;margin-top:4px;}
+.reset-btn:hover{background:rgba(196,160,68,0.1);border-color:var(--g);}
+
+.content{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+.toolbar{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:12px 24px;border-bottom:1px solid var(--bo);background:rgba(255,252,245,0.9);}
+.toolbar-left{font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.2em;color:var(--txl);}
+.search-box{padding:8px 14px;border:1px solid var(--bom);border-radius:2px;background:white;font-family:'EB Garamond',serif;font-size:15px;color:var(--br);outline:none;width:220px;transition:border-color 0.2s;}
+.search-box:focus{border-color:var(--g);}
+.search-box::placeholder{color:var(--txl);font-style:italic;}
+
+.table-wrap{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+table{width:100%;border-collapse:collapse;}
+thead{position:sticky;top:0;z-index:5;background:rgba(242,235,217,0.98);}
+th{padding:10px 16px;font-family:'Cinzel',serif;font-size:7px;letter-spacing:0.2em;color:var(--txl);text-align:left;border-bottom:1px solid var(--bom);white-space:nowrap;cursor:pointer;user-select:none;}
+th:hover{color:var(--g);}
+th:first-child{width:48px;text-align:center;cursor:default;}
+th .sort-arrow{margin-left:4px;opacity:0.4;}
+th.sorted .sort-arrow{opacity:1;color:var(--g);}
+tr{border-bottom:1px solid rgba(122,92,16,0.07);cursor:pointer;transition:background 0.12s;}
+tr:hover{background:rgba(196,160,68,0.07);}
+td{padding:12px 16px;vertical-align:middle;}
+td:first-child{text-align:center;font-family:'Cormorant Garamond',serif;font-size:13px;color:var(--gl);width:48px;}
+.td-name{font-family:'EB Garamond',serif;font-size:16px;color:var(--br);}
+.td-deceased .td-name{color:var(--txl);}
+.td-role{font-family:'EB Garamond',serif;font-style:italic;font-size:13px;color:var(--txm);}
+.td-inst{font-family:'EB Garamond',serif;font-style:italic;font-size:12px;color:var(--txl);}
+.td-country{font-family:'EB Garamond',serif;font-size:13px;color:var(--txl);}
+.td-arr{color:var(--gl);font-size:16px;text-align:right;padding-right:20px;}
+.badge-row{display:flex;gap:4px;flex-wrap:wrap;margin-top:2px;}
+.badge{display:inline-block;padding:2px 6px;border-radius:10px;font-family:'Cinzel',serif;font-size:6px;letter-spacing:0.1em;}
+.badge-guru{background:rgba(122,92,16,0.1);color:var(--g);border:1px solid rgba(122,92,16,0.2);}
+.badge-shishya{background:rgba(42,96,96,0.08);color:#2A6060;border:1px solid rgba(42,96,96,0.2);}
+.badge-kala{background:rgba(196,160,68,0.1);color:#8A6010;border:1px solid rgba(196,160,68,0.3);}
+.dec-mark{font-size:9px;color:var(--gl);margin-left:4px;}
+
+.loading{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;}
+@keyframes sp{to{transform:rotate(360deg)}}
+.lsp{font-size:26px;color:var(--gl);animation:sp 3s linear infinite;}
+.ltx{font-family:'EB Garamond',serif;font-style:italic;font-size:15px;color:var(--txl);}
+.empty{padding:40px;text-align:center;font-family:'EB Garamond',serif;font-style:italic;color:var(--txl);}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="home.html" class="nav-brand">
+    <img src="ParamparaLogo3D.png" style="width:32px;height:32px;object-fit:contain;">
+    <span class="nav-logo">PARAMPARA</span>
+    <span class="nav-div"></span>
+    <span class="nav-sub">Lineage</span>
+  </a>
+  <a href="home.html" class="nav-back">← Back</a>
+</nav>
+
+<div class="main">
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">THE LINEAGE</div>
+      <div class="sidebar-sub">Gurus, Shishyas &amp; Kala-Sadhakas of the Carnatic tradition</div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Filter by Role</div>
+      <div class="role-filters">
+        <div class="role-filter" id="rf-all" onclick="pickRole('all')">
+          <div class="role-filter-left"><div class="role-dot" style="background:var(--gl);"></div><div class="role-filter-name">ALL ARTISTS</div></div>
+          <div class="role-filter-count" id="rc-all">—</div>
+        </div>
+        <div class="role-filter" id="rf-guru" onclick="pickRole('guru')">
+          <div class="role-filter-left"><div class="role-dot" style="background:var(--g);"></div><div class="role-filter-name">GURU</div></div>
+          <div class="role-filter-count" id="rc-guru">—</div>
+        </div>
+        <div class="role-filter" id="rf-shishya" onclick="pickRole('shishya')">
+          <div class="role-filter-left"><div class="role-dot" style="background:var(--tl);"></div><div class="role-filter-name">SHISHYA</div></div>
+          <div class="role-filter-count" id="rc-shishya">—</div>
+        </div>
+        <div class="role-filter" id="rf-kala" onclick="pickRole('kala')">
+          <div class="role-filter-left"><div class="role-dot" style="background:var(--gb);"></div><div class="role-filter-name">KALA-SADHAKA</div></div>
+          <div class="role-filter-count" id="rc-kala">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Filter by Country</div>
+      <div class="km-dropdown" id="dd-country">
+        <button class="km-dropdown-btn" id="dd-country-btn" onclick="toggleDD('dd-country')">All Countries</button>
+        <div class="km-dropdown-list" id="dd-country-list">
+          <div class="km-dropdown-item selected" onclick="pickCountry('all','All Countries')">All Countries</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Filter by Discipline</div>
+      <div class="km-dropdown" id="dd-disc">
+        <button class="km-dropdown-btn" id="dd-disc-btn" onclick="toggleDD('dd-disc')">All Disciplines</button>
+        <div class="km-dropdown-list" id="dd-disc-list">
+          <div class="km-dropdown-item selected" onclick="pickDisc('all','All Disciplines')">All Disciplines</div>
+          <div class="km-dropdown-item" onclick="pickDisc('Vocal','Vocal')">Vocal</div>
+          <div class="km-dropdown-item" onclick="pickDisc('Violin','Violin')">Violin</div>
+          <div class="km-dropdown-item" onclick="pickDisc('Mridangam','Mridangam')">Mridangam</div>
+          <div class="km-dropdown-item" onclick="pickDisc('Veena','Veena')">Veena</div>
+          <div class="km-dropdown-item" onclick="pickDisc('Flute','Flute')">Flute</div>
+          <div class="km-dropdown-item" onclick="pickDisc('Mandolin','Mandolin')">Mandolin</div>
+          <div class="km-dropdown-item" onclick="pickDisc('Ghatam','Ghatam')">Ghatam</div>
+          <div class="km-dropdown-item" onclick="pickDisc('Kanjira','Kanjira')">Kanjira</div>
+          <div class="km-dropdown-item" onclick="pickDisc('Morsing','Morsing')">Morsing</div>
+          <div class="km-dropdown-item" onclick="pickDisc('Thavil','Thavil')">Thavil</div>
+          <div class="km-dropdown-item" onclick="pickDisc('Nadaswaram','Nadaswaram')">Nadaswaram</div>
+          <div class="km-dropdown-item" onclick="pickDisc('Chitravina','Chitravina / Gottuvadyam')">Chitravina / Gottuvadyam</div>
+          <div class="km-dropdown-item" onclick="pickDisc('Konnakol','Konnakol')">Konnakol</div>
+          <div class="km-dropdown-item" onclick="pickDisc('Saxophone','Saxophone')">Saxophone</div>
+          <div class="km-dropdown-item" onclick="pickDisc('Clarinet','Clarinet')">Clarinet</div>
+          <div class="km-dropdown-item" onclick="pickDisc('Jalatarangam','Jalatarangam')">Jalatarangam</div>
+        </div>
+      </div>
+      <button class="reset-btn" onclick="resetFilters()">RESET ALL FILTERS</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="toolbar">
+      <div class="toolbar-left" id="toolbar-label">ALL ARTISTS</div>
+      <input class="search-box" type="text" id="search-input" placeholder="Search artist…" oninput="onSearch(this.value)">
+    </div>
+
+    <div id="loading-state" class="loading">
+      <div class="lsp">✦</div>
+      <div class="ltx">Loading lineage…</div>
+    </div>
+
+    <div class="table-wrap" id="table-wrap" style="display:none;flex-direction:column;">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th onclick="sortBy('full_name')">ARTIST <span class="sort-arrow" id="sa-full_name">↕</span></th>
+            <th onclick="sortBy('primary_role')">ROLE <span class="sort-arrow" id="sa-primary_role">↕</span></th>
+            <th onclick="sortBy('instruments')">INSTRUMENTS <span class="sort-arrow" id="sa-instruments">↕</span></th>
+            <th onclick="sortBy('current_country')">COUNTRY <span class="sort-arrow" id="sa-current_country">↕</span></th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+      <div class="empty" id="empty-state" style="display:none;">No artists match.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SU = 'https://enxhnemcgbicfxzrfveh.supabase.co';
+const SK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVueGhuZW1jZ2JpY2Z4enJmdmVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczODQ0ODMsImV4cCI6MjA5Mjk2MDQ4M30.zTBJ5DAs4v965Dmy4wCfcSWa5eIVFGnf8XvXEFuBDpE';
+const { createClient } = supabase;
+const db = createClient(SU, SK);
+
+let allArtists = [];
+let currentRole = 'all';
+let currentCountry = 'all';
+let currentDisc = 'all';
+let currentSearch = '';
+let sortCol = 'full_name';
+let sortDir = 1;
+let openDD = null;
+
+function toggleDD(id) {
+  const dd = document.getElementById(id);
+  const list = dd.querySelector('.km-dropdown-list');
+  const btn = dd.querySelector('.km-dropdown-btn');
+  const isOpen = list.classList.contains('open');
+  if (openDD && openDD !== id) {
+    const prev = document.getElementById(openDD);
+    if (prev) { prev.querySelector('.km-dropdown-list').classList.remove('open'); prev.querySelector('.km-dropdown-btn').classList.remove('open'); }
+  }
+  if (isOpen) { list.classList.remove('open'); btn.classList.remove('open'); openDD = null; }
+  else {
+    const rect = btn.getBoundingClientRect();
+    list.style.left = rect.left + 'px'; list.style.top = (rect.bottom + 2) + 'px'; list.style.width = rect.width + 'px';
+    list.classList.add('open'); btn.classList.add('open'); openDD = id;
+  }
+}
+document.addEventListener('click', e => {
+  if (openDD && !e.target.closest('.km-dropdown')) {
+    const dd = document.getElementById(openDD);
+    if (dd) { dd.querySelector('.km-dropdown-list').classList.remove('open'); dd.querySelector('.km-dropdown-btn').classList.remove('open'); }
+    openDD = null;
+  }
+});
+
+function pickRole(val) {
+  currentRole = val;
+  document.querySelectorAll('.role-filter').forEach(el => el.classList.remove('active'));
+  document.getElementById('rf-' + val).classList.add('active');
+  applyFilters();
+}
+
+function pickCountry(val, label) {
+  currentCountry = val;
+  document.getElementById('dd-country-btn').textContent = label;
+  document.querySelectorAll('#dd-country-list .km-dropdown-item').forEach(el => el.classList.toggle('selected', el.textContent.trim() === label));
+  document.getElementById('dd-country-list').classList.remove('open');
+  document.getElementById('dd-country-btn').classList.remove('open');
+  openDD = null;
+  applyFilters();
+}
+
+function pickDisc(val, label) {
+  currentDisc = val;
+  document.getElementById('dd-disc-btn').textContent = label;
+  document.querySelectorAll('#dd-disc-list .km-dropdown-item').forEach(el => el.classList.toggle('selected', el.textContent.trim() === label));
+  document.getElementById('dd-disc-list').classList.remove('open');
+  document.getElementById('dd-disc-btn').classList.remove('open');
+  openDD = null;
+  applyFilters();
+}
+
+function onSearch(q) { currentSearch = q; applyFilters(); }
+
+function sortBy(col) {
+  if (sortCol === col) sortDir = -sortDir;
+  else { sortCol = col; sortDir = 1; }
+  document.querySelectorAll('.sort-arrow').forEach(el => { el.textContent = '↕'; el.parentElement.classList.remove('sorted'); });
+  const arrow = document.getElementById('sa-' + col);
+  if (arrow) { arrow.textContent = sortDir === 1 ? '↑' : '↓'; arrow.parentElement.classList.add('sorted'); }
+  applyFilters();
+}
+
+function resetFilters() {
+  currentRole = 'all'; currentCountry = 'all'; currentDisc = 'all'; currentSearch = '';
+  document.querySelectorAll('.role-filter').forEach(el => el.classList.remove('active'));
+  document.getElementById('rf-all').classList.add('active');
+  document.getElementById('dd-country-btn').textContent = 'All Countries';
+  document.querySelectorAll('#dd-country-list .km-dropdown-item').forEach((el,i) => el.classList.toggle('selected', i===0));
+  document.getElementById('dd-disc-btn').textContent = 'All Disciplines';
+  document.querySelectorAll('#dd-disc-list .km-dropdown-item').forEach((el,i) => el.classList.toggle('selected', i===0));
+  document.getElementById('search-input').value = '';
+  applyFilters();
+}
+
+async function load() {
+  try {
+    const { data: profiles } = await db.from('profiles')
+      .select('id,full_name,primary_role,current_country,instrument_aliases,is_deceased')
+      .in('primary_role', ['Vocalist','Instrumentalist','Guru','Rasika','Composer'])
+      .order('full_name');
+
+    const { data: links } = await db.from('guru_shishya_lineage').select('guru_id,shishya_id');
+    const guruCount = {}, shishyaCount = {};
+    (links || []).forEach(l => {
+      guruCount[l.guru_id] = (guruCount[l.guru_id] || 0) + 1;
+      shishyaCount[l.shishya_id] = (shishyaCount[l.shishya_id] || 0) + 1;
+    });
+
+    allArtists = (profiles || []).map(p => ({
+      ...p,
+      shishyaCount: guruCount[p.id] || 0,
+      guruCount: shishyaCount[p.id] || 0,
+      instruments: parseInstruments(p.instrument_aliases)
+    }));
+
+    // Build country dropdown
+    const countries = [...new Set(allArtists.map(p => p.current_country).filter(Boolean))].sort();
+    const countryList = document.getElementById('dd-country-list');
+    countries.forEach(c => {
+      const div = document.createElement('div');
+      div.className = 'km-dropdown-item';
+      div.textContent = c;
+      div.onclick = () => pickCountry(c, c);
+      countryList.appendChild(div);
+    });
+
+    // Update role counts
+    document.getElementById('rc-all').textContent = allArtists.length;
+    document.getElementById('rc-guru').textContent = allArtists.filter(p => p.shishyaCount > 0).length;
+    document.getElementById('rc-shishya').textContent = allArtists.filter(p => p.guruCount > 0).length;
+    document.getElementById('rc-kala').textContent = allArtists.filter(p => ['Vocalist','Instrumentalist'].includes(p.primary_role)).length;
+
+    document.getElementById('rf-all').classList.add('active');
+    document.getElementById('loading-state').style.display = 'none';
+    document.getElementById('table-wrap').style.display = 'flex';
+
+    applyFilters();
+  } catch(e) {
+    document.getElementById('loading-state').innerHTML = '<div class="ltx" style="color:#8B2020;">Could not load data.</div>';
+  }
+}
+
+function parseInstruments(aliases) {
+  if (!aliases) return [];
+  if (typeof aliases === 'string') { try { aliases = JSON.parse(aliases); } catch { return []; } }
+  if (Array.isArray(aliases)) return aliases.filter(x => x && x !== 'Vocal');
+  return [];
+}
+
+function applyFilters() {
+  let f = allArtists;
+  if (currentRole === 'guru') f = f.filter(p => p.shishyaCount > 0);
+  else if (currentRole === 'shishya') f = f.filter(p => p.guruCount > 0);
+  else if (currentRole === 'kala') f = f.filter(p => ['Vocalist','Instrumentalist'].includes(p.primary_role));
+  if (currentCountry !== 'all') f = f.filter(p => p.current_country === currentCountry);
+  if (currentDisc !== 'all') {
+    if (currentDisc === 'Vocal') f = f.filter(p => p.primary_role === 'Vocalist');
+    else f = f.filter(p => (p.instruments||[]).some(i => i.toLowerCase().includes(currentDisc.toLowerCase())));
+  }
+  if (currentSearch) f = f.filter(p => (p.full_name||'').toLowerCase().includes(currentSearch.toLowerCase()));
+
+  // Sort
+  f = [...f].sort((a, b) => {
+    let av = a[sortCol], bv = b[sortCol];
+    if (sortCol === 'instruments') { av = (a.instruments||[]).join(', '); bv = (b.instruments||[]).join(', '); }
+    av = (av||'').toLowerCase(); bv = (bv||'').toLowerCase();
+    return av < bv ? -sortDir : av > bv ? sortDir : 0;
+  });
+
+  renderTable(f);
+  const parts = [];
+  if (currentRole !== 'all') parts.push(currentRole.toUpperCase());
+  if (currentCountry !== 'all') parts.push(currentCountry);
+  if (currentDisc !== 'all') parts.push(currentDisc);
+  document.getElementById('toolbar-label').textContent = (parts.length ? parts.join(' · ') + ' · ' : 'ALL ARTISTS · ') + f.length;
+}
+
+function renderTable(artists) {
+  const tbody = document.getElementById('tbody');
+  const empty = document.getElementById('empty-state');
+  if (!artists.length) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  tbody.innerHTML = artists.map((a, i) => {
+    const ins = (a.instruments || []).slice(0, 2).join(', ');
+    const badges = [];
+    if (a.shishyaCount > 0) badges.push('<span class="badge badge-guru">GURU</span>');
+    if (a.guruCount > 0) badges.push('<span class="badge badge-shishya">SHISHYA</span>');
+    if (['Vocalist','Instrumentalist'].includes(a.primary_role)) badges.push('<span class="badge badge-kala">KALA-SADHAKA</span>');
+    const dec = a.is_deceased ? ' td-deceased' : '';
+    const decMark = a.is_deceased ? '<span class="dec-mark">✦</span>' : '';
+    return `<tr class="${dec}" onclick="goToArtist('${(a.id||'').replace(/'/g,"\\'")}','${(a.full_name||'').replace(/'/g,"\\'")}')">
+      <td>${i + 1}</td>
+      <td><div class="td-name">${a.full_name||''}${decMark}</div><div class="badge-row">${badges.join('')}</div></td>
+      <td class="td-role">${a.primary_role||''}</td>
+      <td class="td-inst">${ins}</td>
+      <td class="td-country">${a.current_country||''}</td>
+      <td class="td-arr">›</td>
+    </tr>`;
+  }).join('');
+}
+
+function goToArtist(id, name) {
+  window.location.href = 'artist.html?id=' + encodeURIComponent(id) + '&name=' + encodeURIComponent(name);
+}
+
+load();
+</script>
+</body>
+</html>
