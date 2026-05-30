@@ -310,7 +310,7 @@ async function load() {
     .limit(2000)
     .order('full_name');
 
-    const { data: links } = await db.from('guru_shishya_lineage').select('guru_id,shishya_id');
+    const { data: links } = await db.from('guru_shishya_lineage').select('guru_id,shishya_id').limit(5000);
     const guruCount = {}, shishyaCount = {};
     (links || []).forEach(l => {
       guruCount[l.guru_id] = (guruCount[l.guru_id] || 0) + 1;
