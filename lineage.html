@@ -305,9 +305,10 @@ function resetFilters() {
 async function load() {
   try {
     const { data: profiles } = await db.from('profiles')
-      .select('id,full_name,primary_role,current_country,instrument_aliases,is_deceased')
-      .in('primary_role', ['Vocalist','Instrumentalist','Guru','Rasika','Composer'])
-      .order('full_name');
+    .select('id,full_name,primary_role,current_country,instrument_aliases,is_deceased')
+    .in('primary_role', ['Vocalist','Instrumentalist','Guru','Rasika','Composer'])
+    .limit(2000)
+    .order('full_name');
 
     const { data: links } = await db.from('guru_shishya_lineage').select('guru_id,shishya_id');
     const guruCount = {}, shishyaCount = {};
