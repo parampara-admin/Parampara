@@ -260,6 +260,7 @@
     <div class="nav-right">
       
       <button class="nav-btn" onclick="window.location.href='index.html?view=stats'">STATISTICS</button>
+      <div onclick="window.location.href='profile.html'" style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#7a5510,#c9a84c);display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:'Cinzel',serif;font-size:12px;font-weight:600;color:#f5ead0;letter-spacing:0.05em;border:2px solid rgba(160,120,40,0.4);transition:opacity 0.2s;" id="nav-profile-circle">?</div>
       <button class="nav-signout" onclick="signOut()">SIGN OUT</button>
     </div>
   </nav>
@@ -341,6 +342,17 @@
       document.getElementById('user-firstname').textContent = name;
       console.log('Auth meta:', JSON.stringify(meta));
     });
+    (async function(){
+  const {data:{session}} = await sb.auth.getSession();
+  if(session){
+    const {data} = await sb.from('profiles').select('full_name').eq('auth_id',session.user.id).single();
+    if(data && data.full_name){
+      const p = data.full_name.trim().split(/\s+/);
+      const initials = p.length===1 ? p[0][0] : p[0][0]+p[p.length-1][0];
+      document.getElementById('nav-profile-circle').textContent = initials.toUpperCase();
+    }
+  }
+})();
   </script>
 </body>
 </html>
