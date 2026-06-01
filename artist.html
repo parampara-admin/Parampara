@@ -142,7 +142,7 @@ a{color:inherit;text-decoration:none;}
 const SU = 'https://enxhnemcgbicfxzrfveh.supabase.co';
 const SK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVueGhuZW1jZ2JpY2Z4enJmdmVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczODQ0ODMsImV4cCI6MjA5Mjk2MDQ4M30.zTBJ5DAs4v965Dmy4wCfcSWa5eIVFGnf8XvXEFuBDpE';
 const { createClient } = supabase;
-const db = createClient(SU, SK);
+window.db = createClient(SU, SK);
 
 let zoomBeh = null;
 
