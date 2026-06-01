@@ -215,7 +215,7 @@ function drawLin(data) {
   const svg = d3.select('#lin-svg').attr('width', W).attr('height', H);
   svg.selectAll('*').remove();
   const g = svg.append('g');
-  const zoom = d3.zoom().scaleExtent([0.15, 3]).on('zoom', e => g.attr('transform', e.transform));
+  const zoom = d3.zoom().scaleExtent([0.15, 3]).filter(event => !event.target.closest('circle, text')).on('zoom', e => g.attr('transform', e.transform));
   svg.call(zoom);
   zoomBeh = zoom;
 
