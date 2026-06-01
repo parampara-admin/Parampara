@@ -337,7 +337,7 @@ function drawLin(data) {
     }).on('mouseleave', () => tt.classList.remove('show'))
     .on('click', (event) => {
     event.stopPropagation();
-        if (!isR && n.id) {
+        if (!isR) {
           tt.classList.remove('show');
           showArtistModal(n);
         }
