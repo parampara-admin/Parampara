@@ -1659,5 +1659,28 @@ function kmResetView() {
   // Reset map view
   if (kmMap) kmMap.setView([13.5, 80.0], 6);
 }
+function goToArtist(id, name) {
+  const artist = (window.allArtists||[]).find(a => a.id === id);
+  if (!artist) { window.location.href = 'artist.html?id=' + encodeURIComponent(id) + '&name=' + encodeURIComponent(name); return; }
+  const p = (artist.full_name||'').trim().split(/\s+/);
+  document.getElementById('am-initials').textContent = (p.length===1 ? p[0][0] : p[0][0]+p[p.length-1][0]).toUpperCase();
+  document.getElementById('am-name').textContent = artist.full_name||'';
+  document.getElementById('am-role').textContent = artist.primary_role||'';
+  document.getElementById('am-location').textContent = artist.current_country||'—';
+  document.getElementById('am-instruments').textContent = (artist.instruments||[]).slice(0,3).join(', ')||'—';
+  document.getElementById('am-shishyas').textContent = artist.shishyaCount > 0 ? artist.shishyaCount + ' known' : '—';
+  document.getElementById('am-deceased').style.display = artist.is_deceased ? 'block' : 'none';
+  const badges = [];
+  if(artist.shishyaCount > 0) badges.push('<span class="badge badge-guru">GURU</span>');
+  if(artist.guruCount > 0) badges.push('<span class="badge badge-shishya">SHISHYA</span>');
+  if(['Vocalist','Instrumentalist'].includes(artist.primary_role)) badges.push('<span class="badge badge-kala">KALA-SADHAKA</span>');
+  document.getElementById('am-badges').innerHTML = badges.join('');
+  document.getElementById('am-viewbtn').onclick = () => { window.location.href = 'artist.html?id=' + encodeURIComponent(id) + '&name=' + encodeURIComponent(name); };
+  document.getElementById('artist-modal-overlay').style.display = 'flex';
+}
 
+function closeArtistModal(e) {
+  if (e && e.target !== document.getElementById('artist-modal-overlay')) return;
+  document.getElementById('artist-modal-overlay').style.display = 'none';
+}
 
