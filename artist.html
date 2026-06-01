@@ -378,7 +378,7 @@ function showArtistModal(n) {
   document.getElementById('am-initials').textContent = p.length===1 ? p[0][0] : p[0][0]+p[p.length-1][0].toUpperCase();
   document.getElementById('am-name').textContent = n.name||'';
   document.getElementById('am-role').textContent = n.role||'';
-  document.getElementById('am-location').textContent = n.country||'–';
+  document.getElementById('am-location').textContent = n.current_country||n.country||'–';
   document.getElementById('am-badges').innerHTML = '';
   document.getElementById('am-viewbtn').onclick = () => { window.location.href = 'artist.html?id=' + encodeURIComponent(n.id) + '&name=' + encodeURIComponent(n.name); };
   document.getElementById('artist-modal-overlay').style.display = 'flex';
