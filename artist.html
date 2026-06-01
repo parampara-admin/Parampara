@@ -378,10 +378,20 @@ function showArtistModal(n) {
   document.getElementById('am-initials').textContent = p.length===1 ? p[0][0] : p[0][0]+p[p.length-1][0].toUpperCase();
   document.getElementById('am-name').textContent = n.name||'';
   document.getElementById('am-role').textContent = n.role||'';
-  document.getElementById('am-location').textContent = n.current_country||n.country||'–';
+  document.getElementById('am-location').textContent = '...';
   document.getElementById('am-badges').innerHTML = '';
   document.getElementById('am-viewbtn').onclick = () => { window.location.href = 'artist.html?id=' + encodeURIComponent(n.id) + '&name=' + encodeURIComponent(n.name); };
   document.getElementById('artist-modal-overlay').style.display = 'flex';
+  if (n.id) {
+    db.from('profiles').select('current_country,instrument_aliases,shishya_count,guru_count,is_deceased').eq('id', n.id).single().then(({data}) => {
+      if (!data) return;
+      document.getElementById('am-location').textContent = data.current_country||'–';
+      const badges = [];
+      if (data.guru_count > 0) badges.push('<span class="badge badge-guru">GURU</span>');
+      if (data.shishya_count > 0) badges.push('<span class="badge badge-shishya">SHISHYA</span>');
+      document.getElementById('am-badges').innerHTML = badges.join('');
+    });
+  }
 }
 
 function closeArtistModal(e) {
