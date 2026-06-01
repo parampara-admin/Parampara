@@ -390,7 +390,7 @@ function showArtistModal(n) {
   const badges = [];
   document.getElementById('am-badges').innerHTML = '';
   document.getElementById('am-viewbtn').onclick = () => { window.location.href = 'artist.html?id=' + encodeURIComponent(n.id) + '&name=' + encodeURIComponent(n.name); };
-  document.getElementById('artist-modal-overlay').style.display = 'flex';
+  alert('modal firing'); document.getElementById('artist-modal-overlay').style.display = 'flex';
 }
 
 function closeArtistModal(e) {
