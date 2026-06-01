@@ -322,11 +322,11 @@ function drawLin(data) {
       tt.style.left = (ev.clientX + 14) + 'px'; tt.style.top = (ev.clientY - 8) + 'px';
     }).on('mouseleave', () => tt.classList.remove('show'))
     .on('click', () => {
-      if (!isR && n.id) {
-        tt.classList.remove('show');
-        window.location.href = 'artist.html?id=' + encodeURIComponent(n.id) + '&name=' + encodeURIComponent(n.name);
-      }
-    });
+        if (!isR && n.id) {
+          tt.classList.remove('show');
+          showArtistModal(n);
+        }
+      }); 
   });
 
   document.getElementById('loading').style.display = 'none';
@@ -363,7 +363,27 @@ function resetZoom() {
   } catch(e) {}
 }
 
+function showArtistModal(n) {
+  const p = (n.name||'').trim().split(/\s+/);
+  document.getElementById('am-initials').textContent = p.length===1 ? p[0][0] : p[0][0]+p[p.length-1][0].toUpperCase();
+  document.getElementById('am-name').textContent = n.name||'';
+  document.getElementById('am-role').textContent = n.role||'';
+  document.getElementById('am-location').textContent = n.country||'–';
+  document.getElementById('am-instruments').textContent = '';
+  document.getElementById('am-shishyas').textContent = '–';
+  document.getElementById('am-deceased').style.display = 'none';
+  const badges = [];
+  document.getElementById('am-badges').innerHTML = '';
+  document.getElementById('am-viewbtn').onclick = () => { window.location.href = 'artist.html?id=' + encodeURIComponent(n.id) + '&name=' + encodeURIComponent(n.name); };
+  document.getElementById('artist-modal-overlay').style.display = 'flex';
+}
+
+function closeArtistModal(e) {
+  if (e && e.target !== document.getElementById('artist-modal-overlay')) return;
+  document.getElementById('artist-modal-overlay').style.display = 'none';
+}
 load();
 </script>
+<div id="artist-modal-overlay" class="artist-modal-overlay" style="display:none" onclick="closeArtistModal(event)"><div class="artist-modal"><button class="artist-modal-close" onclick="document.getElementById('artist-modal-overlay').style.display='none'">✕</button><div class="artist-modal-initials" id="am-initials"></div><div class="artist-modal-name" id="am-name"></div><div class="artist-modal-role" id="am-role"></div><div class="artist-modal-divider"></div><div class="artist-modal-row"><span class="artist-modal-label">LOCATION</span><span class="artist-modal-val" id="am-location"></span></div><div class="artist-modal-row" id="am-dec-row"><span class="artist-modal-label" id="am-deceased"></span></div><div class="artist-modal-badges" id="am-badges"></div><button class="artist-modal-btn" id="am-viewbtn">View Full Profile →</button></div></div>
 </body>
 </html>
