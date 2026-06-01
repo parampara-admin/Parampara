@@ -236,7 +236,7 @@ function renderBridges(bridges) {
     let lt = '';
     (p.livingGurus || []).forEach(g => { lt += '<span class="lb-guru-tag">' + g.full_name + '</span>'; });
 
-    out += '<div class="lb-card">' +
+    out += '<div class="lb-card" onclick="window.location.href=\'artist.html?id=\'+encodeURIComponent(\''+p.id+'\')+\'&name=\'+encodeURIComponent(\''+(p.full_name||'').replace(/'/g,'')+'\');" style="cursor:pointer">' +
       '<div class="lb-badge">✦ LIVING BRIDGE</div>' +
       '<div class="lb-name">' + (p.full_name || '') + '</div>' +
       '<div class="lb-role">' + (p.primary_role || '') + (ins ? ' · ' + ins : '') + (p.current_country ? ' · ' + p.current_country : '') + '</div>' +
