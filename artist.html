@@ -379,11 +379,9 @@ function showArtistModal(n) {
   document.getElementById('am-name').textContent = n.name||'';
   document.getElementById('am-role').textContent = n.role||'';
   document.getElementById('am-location').textContent = n.country||'–';
-  document.getElementById('am-deceased').style.display = 'none';
-  const badges = [];
   document.getElementById('am-badges').innerHTML = '';
   document.getElementById('am-viewbtn').onclick = () => { window.location.href = 'artist.html?id=' + encodeURIComponent(n.id) + '&name=' + encodeURIComponent(n.name); };
-  alert('modal firing'); document.getElementById('artist-modal-overlay').style.display = 'flex';
+  document.getElementById('artist-modal-overlay').style.display = 'flex';
 }
 
 function closeArtistModal(e) {
