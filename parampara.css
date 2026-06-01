@@ -845,3 +845,20 @@ body{font-family:'EB Garamond',serif;background:var(--iv);color:var(--tx);}
 .lb-stat-lbl{font-family:'Cinzel',serif;font-size:7px;letter-spacing:0.12em;color:#8A7040;}
 .lb-arrow{position:absolute;right:16px;top:50%;transform:translateY(-50%);color:#C4A044;font-size:18px;}
 .lb-empty{grid-column:1/-1;padding:40px;text-align:center;font-family:'EB Garamond',serif;font-style:italic;color:#8A7040;}
+
+/* ── ARTIST MODAL CARD ── */
+.artist-modal-overlay{position:fixed;inset:0;background:rgba(30,21,8,0.55);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;}
+.artist-modal{background:var(--iv);border:1px solid var(--bo);border-radius:3px;max-width:400px;width:100%;padding:28px 24px;position:relative;box-shadow:0 8px 40px rgba(30,21,8,0.18);}
+.artist-modal-close{position:absolute;top:12px;right:16px;background:none;border:none;font-size:18px;color:var(--txm);cursor:pointer;line-height:1;}
+.artist-modal-close:hover{color:var(--g);}
+.artist-modal-initials{width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--gm),var(--g));display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:20px;font-weight:600;color:var(--iv);margin:0 auto 10px;}
+.artist-modal-name{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--br);text-align:center;margin-bottom:3px;}
+.artist-modal-role{font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.2em;color:var(--g);text-align:center;text-transform:uppercase;margin-bottom:14px;}
+.artist-modal-deceased{font-family:'EB Garamond',serif;font-style:italic;font-size:13px;color:var(--txm);text-align:center;margin-top:-8px;margin-bottom:10px;}
+.artist-modal-divider{height:1px;background:var(--bo);margin:12px 0;}
+.artist-modal-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;}
+.artist-modal-label{font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.16em;color:var(--txm);text-transform:uppercase;}
+.artist-modal-val{font-family:'EB Garamond',serif;font-size:15px;color:var(--tx);text-align:right;}
+.artist-modal-badges{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 2px;}
+.artist-modal-btn{width:100%;margin-top:14px;padding:12px;background:linear-gradient(135deg,var(--gm),var(--g));border:none;border-radius:2px;font-family:'Cinzel',serif;font-size:11px;letter-spacing:0.2em;color:var(--iv);font-weight:700;cursor:pointer;transition:opacity 0.2s;}
+.artist-modal-btn:hover{opacity:0.88;}
