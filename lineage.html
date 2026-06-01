@@ -416,5 +416,6 @@ function goToArtist(id, name) {
 
 load();
 </script>
+<div id="artist-modal-overlay" class="artist-modal-overlay" style="display:none" onclick="closeArtistModal(event)"><div class="artist-modal"><button class="artist-modal-close" onclick="closeArtistModal()">✕</button><div class="artist-modal-initials" id="am-initials">?</div><div class="artist-modal-name" id="am-name"></div><div class="artist-modal-role" id="am-role"></div><div class="artist-modal-deceased" id="am-deceased" style="display:none">✦ Returned to the eternal</div><div class="artist-modal-divider"></div><div class="artist-modal-row"><span class="artist-modal-label">Location</span><span class="artist-modal-val" id="am-location"></span></div><div class="artist-modal-row"><span class="artist-modal-label">Instruments</span><span class="artist-modal-val" id="am-instruments"></span></div><div class="artist-modal-row"><span class="artist-modal-label">Shishyas</span><span class="artist-modal-val" id="am-shishyas"></span></div><div class="artist-modal-badges" id="am-badges"></div><button class="artist-modal-btn" id="am-viewbtn">VIEW FULL PROFILE →</button></div></div>
 </body>
 </html>
