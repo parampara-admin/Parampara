@@ -285,7 +285,7 @@ function drawLin(data) {
     const isR = n.type === 'root', isA = n.type === 'anc';
     const r = isR ? 24 : 17; // bigger circles
     const ng = g.append('g').attr('transform', `translate(${n.x},${n.y})`).style('opacity', 0).style('cursor', 'pointer');
-    ng.node().addEventListener('click', () => { if (!isR) { tt.classList.remove('show'); showArtistModal(n); } }, true);
+    ng.node().addEventListener('click', () => { tt.classList.remove('show'); showArtistModal(n); }, true);
     if (isR) ng.append('circle').attr('r', 44).attr('fill', 'var(--g)').attr('opacity', 0.06);
     ng.append('circle').attr('r', 0)
       .attr('fill', isR ? 'var(--g)' : (isA ? 'var(--ivm)' : 'rgba(42,96,96,0.07)'))
