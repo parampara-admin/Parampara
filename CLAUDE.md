@@ -12,12 +12,39 @@ Static HTML/CSS/JS site — **no build step**. Deployed to GitHub Pages at `para
 
 ## Two code patterns
 
-### 1. `profile.html` — the SPA shell
+### 1. `index.html` — the SPA shell
 
-`profile.html` (1115 lines) is a multi-screen single-page app. It loads `parampara.css`, Supabase JS v2, D3 v7, and Leaflet from CDN, then loads:
+`index.html` (352 lines) is the multi-screen single-page app. It loads `parampara.css`, Supabase JS v2, D3 v7, and Leaflet from CDN, then loads:
 
-- **`parampara-data.js`** — creates the shared `db` Supabase client (anon key, no auth session), defines global constants (`FL` country-flag map, `INSTRUMENTS`, `KM_ROUTE_COLORS`, `KM_COMPOSERS`), and stat-counting async functions (`cntGuru`, `cntShishya`, `cntRole`, `cntKala`, `cntVadya`, `cntComp`, `cntEnt`).
+- **`parampara-data.js`** (124 lines) — creates the shared `db` Supabase client (anon key, no auth session), declares mutable globals (`profs`, `cg`, `loaded`, `prev`, `dCal`, `allBaniGurus`), defines constants (`FL` country-flag map, `INSTRUMENTS`, `SAD`, `PRA`, `MIN_ACTIVE=3`, `KM_ROUTE_COLORS`, `KM_COMPOSERS`), and stat-counting async functions (`cntGuru`, `cntShishya`, `cntRole`, `cntKala`, `cntVadya`, `cntComp`, `cntEnt`).
 - **`parampara-ui.js`** (1686 lines) — all UI logic: screen switching (`showSc(id)` toggles `.sc → .sc.active → .sc.active.visible`), Living Bridges, Stats, Instrument/Geography grids, Bani Gurus, Master Lineage D3 tree, Lineage drawer, Kshetra Leaflet map, pilgrimage routes, pilgrim planner.
+
+#### SPA screen IDs (toggled by `showSc(id)`)
+
+| ID | Screen |
+|---|---|
+| `#sl` | Landing — shown on page load |
+| `#ss` | Stats/Explore — loaded lazily on first visit via `loadStats()` |
+| `#slin` | Lineage drawer — D3 tree centred on a selected artist |
+
+Inside `#ss`, tabs switch `view-panel` elements via `switchView(name, btn)`:
+
+| ID | Panel |
+|---|---|
+| `#view-overview` | Category tile grids (SAD + PRA arrays) |
+| `#view-instruments` | Instrument breakdown |
+| `#view-geography` | Country breakdown |
+| `#view-lineages` | Bani Guru cards |
+
+LIVING BRIDGES and KSHETRA KRITI MAP navigate externally to `bridges.html` and `kshetra.html`.
+
+#### Key function: `openLin(name, role, country)`
+
+Navigates to `#slin` and builds the D3 lineage tree. **Looks up artists by `full_name`, not by ID.** Called from drill-down table rows, Bani Guru cards, and Living Bridges cards. When adding any new list that should open the lineage drawer, call `openLin(fullName, role, country)`.
+
+#### Category tile arrays: `SAD` and `PRA`
+
+Defined in `parampara-data.js`. Each entry is `{ k, l, e, ic, q, dr }` where `q` is an async count function. Tiles with count < `MIN_ACTIVE` (3) render as "Coming soon" and are non-clickable. All `PRA` (Pratisthana path) tiles currently show "Coming soon" because entity counts are below the threshold.
 
 ### 2. Standalone pages
 
@@ -25,7 +52,24 @@ Static HTML/CSS/JS site — **no build step**. Deployed to GitHub Pages at `para
 
 `artist.html` takes an `?id=<profile_id>` query parameter and renders a D3 lineage tree centred on that artist: ancestors above (recursively up to 4 levels), shishyas below. Clicking a node opens a modal with **VIEW FULL PAGE** (routes back to `artist.html?id=...`) and **CLOSE**. If `?id` is absent the page shows an empty state.
 
-`index.html`, `auth.html`, `covenant.html`, `home.html` each embed their own scripts with no shared JS files.
+`auth.html`, `covenant.html`, `home.html` each embed their own scripts with no shared JS files.
+
+#### `profile.html` — standalone profile wizard
+
+`profile.html` (1115 lines) is a **standalone 7-step wizard**, not a SPA. It uses **Crimson Text** as the primary font and its own CSS variable set (`--gold`, `--gold-light`, `--bg`, `--card`, `--input-bg`, `--border`, `--border-active`) — **distinct from `parampara.css`**. Steps are `div.step` elements toggled by adding/removing `active`. Step IDs: `#step-1` through `#step-7`, plus `#step-review` and `#step-view`. `#step-view` is the read-only profile display mode.
+
+#### Navigation flow
+
+```
+auth.html → covenant.html → home.html
+home.html → index.html          (Statistics / explore)
+home.html → lineage.html        (Lineage table)
+home.html → bridges.html        (Living Bridges)
+home.html → kshetra.html        (Kshetra-Kriti Map)
+home.html → profile.html        (My Profile wizard)
+lineage.html → artist.html?id=  (Artist page)
+index.html  → artist.html?id=   (via goToArtist())
+```
 
 ## Supabase
 
@@ -62,10 +106,12 @@ Defined as CSS custom properties on `:root` in `parampara.css` and inlined in st
 
 ## Typography
 
-Three Google Fonts loaded in all pages:
+Three Google Fonts loaded in all pages except `profile.html`:
 - **Cinzel** — all-caps labels, nav, buttons (always paired with `letter-spacing`)
 - **Cormorant Garamond** — display headings, large italic text
 - **EB Garamond** — body text, italic copy
+
+`profile.html` uses **Crimson Text** instead and its own CSS variable set — do not apply `parampara.css` variables there.
 
 ## Key patterns and gotchas
 
@@ -76,3 +122,4 @@ Three Google Fonts loaded in all pages:
 - **Duplicate feature code** — Living Bridges, Kshetra map, and Lineage tree each appear in both a standalone `.html` file and inside `parampara-ui.js`. Fixes must be applied to both copies.
 - **Duplicate `cntKala` in `parampara-data.js`** — there are two functions named `cntKala` (lines 87 and 91). The second silently overrides the first. The live version counts non-deceased Vocalists and Instrumentalists. Do not add a third.
 - **No RLS session on data queries** — the shared `db` client queries as anon. Authenticated users in the Next.js rebuild (`/workspaces/parampara-next`) attach a session, which can cause different RLS results for the same query.
+- **`openLin` uses name, not ID** — the lineage drawer looks up profiles by `full_name`. If an artist has a duplicate name, the wrong record may be shown. `artist.html?id=` is more reliable for deep-linking to a specific artist.
