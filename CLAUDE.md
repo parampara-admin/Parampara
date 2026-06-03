@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Next.js Rebuild
+
+Active feature development has moved to `/workspaces/parampara-next` (Next.js 16, TypeScript, App Router). The repo is `parampara-admin/Parampara-Next`. Unless fixing a bug in the legacy site specifically, work in that directory instead. The CLAUDE.md there documents the new architecture.
+
 ## Overview
 
 Static HTML/CSS/JS site — **no build step**. Deployed to GitHub Pages at `parampara-admin.github.io/Parampara/`. Edit files directly; changes take effect on push. There is no package.json, npm, or bundler.
@@ -18,6 +22,8 @@ Static HTML/CSS/JS site — **no build step**. Deployed to GitHub Pages at `para
 ### 2. Standalone pages
 
 `artist.html`, `bridges.html`, `kshetra.html`, `lineage.html` each embed their own self-contained `<script>` block with a fresh Supabase client. They load only the CDN libraries they need (D3 for artist, Leaflet for kshetra). These pages **duplicate** some logic from `parampara-ui.js` — when fixing a bug, check both.
+
+`artist.html` takes an `?id=<profile_id>` query parameter and renders a D3 lineage tree centred on that artist: ancestors above (recursively up to 4 levels), shishyas below. Clicking a node opens a modal with **VIEW FULL PAGE** (routes back to `artist.html?id=...`) and **CLOSE**. If `?id` is absent the page shows an empty state.
 
 `index.html`, `auth.html`, `covenant.html`, `home.html` each embed their own scripts with no shared JS files.
 
@@ -68,4 +74,5 @@ Three Google Fonts loaded in all pages:
 - **Historical gurus** — classified by `is_deceased: true` on the guru's profile, not by discipline value. The `.neq('discipline','Heritage')` filter in some versions of the bridges code excludes all lineage rows for most artists — remove it.
 - **`overflow: hidden` on card elements** — in CSS grid with default `align-items: stretch`, this clips card body content when cards in the same row have different heights. Use `align-self: start` on cards instead.
 - **Duplicate feature code** — Living Bridges, Kshetra map, and Lineage tree each appear in both a standalone `.html` file and inside `parampara-ui.js`. Fixes must be applied to both copies.
+- **Duplicate `cntKala` in `parampara-data.js`** — there are two functions named `cntKala` (lines 87 and 91). The second silently overrides the first. The live version counts non-deceased Vocalists and Instrumentalists. Do not add a third.
 - **No RLS session on data queries** — the shared `db` client queries as anon. Authenticated users in the Next.js rebuild (`/workspaces/parampara-next`) attach a session, which can cause different RLS results for the same query.
